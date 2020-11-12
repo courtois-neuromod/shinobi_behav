@@ -5,7 +5,7 @@ from data import combine_variables
 
 
 def main():
-    """ Runs data processing scripts to turn raw data from (../raw) into
+    """ Runs data processing scripts to turn raw data from (../bids) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
