@@ -14,7 +14,7 @@ def main():
     # start loop
     for subj in subjects:
         for level in levels:
-            print('Extracting game variables for {}_level{}'.format(subj, level))
+            print('Extracting game variables for {}_level-{}'.format(subj, level))
             combine_variables(path_to_data, subj, level)
 
 
