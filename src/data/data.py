@@ -4,6 +4,7 @@ import os.path as op
 import pickle
 import os
 import json
+from src.features.features import compute_max_score
 
 
 def retrieve_variables(files, level, bids=True, by_timestamps=True):
@@ -121,6 +122,7 @@ def remove_fake_reps(allvars):
     '''
     clean allvars from "fake-runs" (i.e. runs stopped without any moves from the player)
     '''
+
     scores = compute_max_score(allvars)
     i = len(scores)-1
     for score in reversed(scores):
@@ -129,26 +131,3 @@ def remove_fake_reps(allvars):
                 del allvars[key][i]
         i -= 1
     return allvars
-
-def fix_position_resets(X_player_lists):
-    '''
-    Sometimes X_player resets to a previous value, but it's truly a new position.
-    This fixes it and makes sure that X_player is continuous
-
-    X_player_lists : A list of X_player arrays (one for each repetition)
-
-    fixed_X_player_lists : same as X_player_lists
-    '''
-    fixed_X_player_lists = []
-    for X_player in X_player_lists:
-        fixed_X_player_list = []
-        fix = 0
-        for i in range(1, len(X_player)-1):
-            if X_player[i-1] - X_player[i] > 100:
-                fix += X_player[i-1] - X_player[i]
-            fixed_X_player_list.append(X_player[i] + fix)
-        fixed_X_player_list = fixed_X_player_list
-        if fixed_X_player_list == []:
-            fixed_X_player_list.append(32) # in case the list becomes empty add 32 so it is removed
-        fixed_X_player_lists.append(fixed_X_player_list)
-    return fixed_X_player_lists
