@@ -12,3 +12,4 @@ numpy
 gym-retro
 scipy
 matplotlib
+pandas
