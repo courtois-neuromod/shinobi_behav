@@ -5,6 +5,8 @@ import click
 from visualization import learning_curve, fetch_usable_reps
 import matplotlib.pyplot as plt
 from src.data.data import combine_variables, remove_fake_reps
+import os.path as op
+import pickle
 
 def main():
     """ Create repetition-wise features based on the processed data from (../processed)
@@ -28,7 +30,8 @@ def main():
             for idx, var in enumerate(variables):
                 ax, idx_thresh = learning_curve(data_dict, 'Days of training', var,
                                             zscore=False, plot=True,
-                                            x_jitter=1, y_jitter=0.1, ax=axes[idx], plotlabels=plotlabels, threshold = None)
+                                            x_jitter=1, y_jitter=0.1,
+                                            ax=axes[idx], plotlabels=plotlabels, threshold = None)
                 idx_thresh_all.append(idx_thresh)
             plotlabels = False
             median_thresh = idx_thresh_all[2]

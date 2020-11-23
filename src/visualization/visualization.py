@@ -90,3 +90,26 @@ def fetch_usable_reps(allvars, data_dict, median_thresh):
         if data_dict['Days of training'][i] >= median_thresh+1:
             usable_filenames.append(allvars['filename'][i][52:])
     return usable_filenames
+
+def plot_bidsevents(events_df):
+    event_ends = []
+    for i in range(len(merged_df['onset'])):
+        event_ends.append(merged_df['onset'][i] + merged_df['duration'][i])
+
+    total_duration = max(event_ends)
+    time_axis = np.linspace(0, total_duration, 10000)
+
+
+    dict_to_plot = {}
+    for ev_type in merged_df['trial_type'].unique():
+        dict_to_plot[ev_type] = np.zeros(len(time_axis))
+
+    for idx, line in merged_df.iterrows():
+        for i, timepoint in enumerate(time_axis):
+            if timepoint >= line['onset'] and timepoint <= line['onset']+line['duration']:
+                dict_to_plot[line['trial_type']][i] = 1
+    fig = plt.plot()
+    for i, key in enumerate(dict_to_plot.keys()):
+        plt.scatter(time_axis, dict_to_plot[key]*(len(dict_to_plot.keys())-i), label=key)
+        plt.legend(bbox_to_anchor=(1,1), loc="upper left")
+    return fig

@@ -4,6 +4,7 @@ import os.path as op
 from datetime import datetime
 from math import ceil
 from scipy.stats import percentileofscore
+import scipy.signal as signal
 
 
 def load_features_dict(path_to_data, subject, level, save=True, metric=None, days_of_train=True, allvars=None):
@@ -291,6 +292,34 @@ def compare_to_distrib(distrib_t2p, time2pos_run):
     for i, pos in enumerate(time2pos_run):
         pos_percentile.append(percentileofscore(distrib_t2p[i], pos))
     return pos_percentile
+
+
+# aps computation
+def compute_framewise_aps(allvars, actions, FS=60):
+    aps_lists = []
+    for rep in range(len(allvars['filename'])):
+        # generate events for each of them
+        action_mat = []
+        for act in actions:
+            var = allvars[act][rep]
+            var_bin = [int(val) for val in var]
+            diffs = list(np.diff(var_bin, n=1))
+            absdiffs = [abs(x) for x in diffs]
+            action_mat.append(absdiffs)
+        action_mat = np.array(action_mat)
+
+        # compute number of action at each frame
+        act_per_frame = np.zeros(action_mat.shape[1])
+        for i in range(len(act_per_frame)):
+            act_per_frame[i] = sum(action_mat[:,i])
+
+        padded_apf = np.concatenate((np.zeros(int(FS/2)), act_per_frame, np.zeros(int(FS/2))))
+        framewise_aps = np.zeros(len(padded_apf)-FS)
+        for frame_idx in range(len(framewise_aps)):
+            framewise_aps[frame_idx] = sum(padded_apf[frame_idx:frame_idx+FS])
+        aps_lists.append(framewise_aps)
+    return aps_lists
+
 
 # utils
 def filter_run(run, order=3, cutoff=0.005):

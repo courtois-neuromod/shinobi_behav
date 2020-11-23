@@ -83,6 +83,7 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
 
         for variable in run_variables.keys():
             variables_lists[variable].append(run_variables[variable])
+    env.close()
     return variables_lists
 
 
