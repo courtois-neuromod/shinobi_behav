@@ -13,3 +13,5 @@ gym-retro
 scipy
 matplotlib
 pandas
+nilearn
+nistats
