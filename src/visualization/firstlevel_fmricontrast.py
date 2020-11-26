@@ -10,6 +10,7 @@ from nilearn import image
 import os
 import numpy as np
 from nilearn.plotting import plot_design_matrix
+from nistats.thresholding import map_threshold
 
 
 def retrieve_variables(files):
@@ -110,7 +111,7 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
  # Set constants
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
-dpath = '/media/hyruuk/Seagate Expansion Drive/DATA/data/shinobi/'
+dpath = '/project/rrg-pbellec/hyruuk/hyruuk_shinobi_behav/data/shinobi/'
 
 
 
