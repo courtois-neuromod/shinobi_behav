@@ -8,6 +8,10 @@ def generate_key_events(var, key, FS=60):
     '''
     var = action variable, directly from allvars dict
     '''
+    # always keep the first and last value as 0 so diff will register the state transition
+    var[0] = 0
+    var[-1] = 0
+    
     var_bin = [int(val) for val in var]
     diffs = list(np.diff(var_bin, n=1))
     presses = [round(i/FS, 3) for i, x in enumerate(diffs) if x == 1]
