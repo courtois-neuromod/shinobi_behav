@@ -16,3 +16,4 @@ pandas
 nilearn
 nistats
 bids
+load_confounds
