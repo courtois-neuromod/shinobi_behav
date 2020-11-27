@@ -37,7 +37,7 @@ for ses in seslist:
         fmri_img.append(image.concat_imgs(filename))
 
 # load events
-with open(dpath + '{}_events_files.pkl', 'rb') as f:
+with open(dpath + '{}_events_files.pkl'.format(sub), 'rb') as f:
     allruns_events = pickle.load(f)
 
 
