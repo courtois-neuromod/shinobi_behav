@@ -45,7 +45,8 @@ fmri_glm = FirstLevelModel(t_r=1.49,
                            standardize=False,
                            hrf_model='spm',
                            drift_model='cosine',
-                           high_pass=.01)
+                           high_pass=.01,
+                           n_jobs=16)
 fmri_glm = fmri_glm.fit(fmri_img, allruns_events)
 
 # get stats map
