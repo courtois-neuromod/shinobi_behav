@@ -23,10 +23,11 @@ seslist= os.listdir(dpath + sub)
 
 # load nifti imgs
 fmri_img = []
-for ses in seslist:
+for ses in sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
+    print('Processing {}'.format(ses))
     print(runs)
-    for run in runs:
+    for run in sorted(runs):
         filename = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/sub-01_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, ses, run)
         fmri_img.append(image.concat_imgs(filename))
 mean_img = image.mean_img(fmri_img)
@@ -56,6 +57,7 @@ clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', clu
 uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
 
 # save images
+print('Generating views')
 view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR=0.05), Noyaux > 10 voxels')
 view.save_as_html(figures_path + '/{}_LmR_statsmap_allruns_FDRcluster.html'.format(sub))
 
