@@ -9,6 +9,7 @@ import os
 import numpy as np
 from nilearn.plotting import plot_design_matrix
 from nistats.thresholding import map_threshold
+from nilearn.glm.first_level import FirstLevelModel
 import pickle
 
 
@@ -22,34 +23,43 @@ dpath = path_to_data + 'shinobi/'
 seslist= os.listdir(dpath + sub)
 
 # load nifti imgs
-fmri_img = []
+fmri_imgs = []
 for ses in sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     print('Processing {}'.format(ses))
     print(runs)
     for run in sorted(runs):
-        filename = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/sub-01_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, ses, run)
-        fmri_img.append(image.concat_imgs(filename))
-mean_img = image.mean_img(fmri_img)
+        data_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, sub, ses, run)
+        confounds_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_desc-confounds_timeseries.tsv'.format(sub, ses, sub, ses, run)
+        anat_fname = dpath + '/{}/{}_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz'.format(sub, sub) # adjust this variable
+        fmri_img = image.concat_imgs(data_fname)
+        masker = NiftiMasker()
+        masker.fit(anat_fname)
+        confounds = load_confounds.Params36().load(confounds_fname)
+        fmri_img_conf = masker.transform(fmri_img, confounds=confounds)
 
-# load events
-with open(dpath + '{}_events_files.pkl'.format(sub), 'rb') as f:
-    allruns_events = pickle.load(f)
+        fmri_imgs.append(fmri_img_conf)
+
+    # load events
+    with open(dpath + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
+        allruns_events.append(pickle.load(f))
 
 
 # build model
-from nilearn.glm.first_level import FirstLevelModel
-print('Fitting a GLM')
-fmri_glm = FirstLevelModel(t_r=1.49,
-                           noise_model='ar1',
-                           standardize=False,
-                           hrf_model='spm',
-                           drift_model='cosine',
-                           high_pass=.01,
-                           n_jobs=16,
-                           smoothing_fwhm=5)
-fmri_glm = fmri_glm.fit(fmri_img, allruns_events)
 
+    print('Fitting a GLM')
+    fmri_glm = FirstLevelModel(t_r=1.49,
+                               noise_model='ar1',
+                               standardize=False,
+                               hrf_model='spm',
+                               drift_model=None,
+                               high_pass=.01,
+                               n_jobs=16,
+                               smoothing_fwhm=5)
+    fmri_glm = fmri_glm.fit(fmri_imgs, allruns_events)
+    report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
+
+'''
 # get stats map
 z_map = fmri_glm.compute_contrast(['LeftH-RightH'] * len(fmri_img),
     output_type='z_score', stat_type='F')
@@ -65,3 +75,4 @@ view.save_as_html(figures_path + '/{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html
 
 view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
 view.save_as_html(figures_path + '/{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub))
+'''
