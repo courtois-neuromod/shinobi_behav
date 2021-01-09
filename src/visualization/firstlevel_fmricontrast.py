@@ -10,6 +10,7 @@ import numpy as np
 from nilearn.plotting import plot_design_matrix
 from nistats.thresholding import map_threshold
 from nilearn.glm.first_level import FirstLevelModel
+from nilearn.input_data import NiftiMasker
 import pickle
 
 
@@ -71,7 +72,7 @@ for ses in sorted(seslist):
 
     # save images
     print('Generating views')
-    view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR=0.05), Noyaux > 10 voxels')
+    view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
     view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
     # save also uncorrected map
     view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
