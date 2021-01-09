@@ -11,6 +11,7 @@ from nilearn.plotting import plot_design_matrix
 from nistats.thresholding import map_threshold
 from nilearn.glm.first_level import FirstLevelModel
 from nilearn.input_data import NiftiMasker
+import load_confounds
 import pickle
 
 
