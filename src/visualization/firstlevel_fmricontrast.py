@@ -24,6 +24,7 @@ seslist= os.listdir(dpath + sub)
 
 # load nifti imgs
 fmri_imgs = []
+confounds = []
 for ses in sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     print('Processing {}'.format(ses))
@@ -31,11 +32,11 @@ for ses in sorted(seslist):
     for run in sorted(runs):
         data_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, sub, ses, run)
         confounds_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_desc-confounds_timeseries.tsv'.format(sub, ses, sub, ses, run)
-        anat_fname = dpath + '/{}/{}_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz'.format(sub, sub) # adjust this variable
+        anat_fname = dpath + 'anat/derivatives/fmriprep-20.2lts/fmriprep/{}/anat/{}_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz'.format(sub, sub)
         fmri_img = image.concat_imgs(data_fname)
         masker = NiftiMasker()
         masker.fit(anat_fname)
-        confounds = load_confounds.Params36().load(confounds_fname)
+        confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
         fmri_img_conf = masker.transform(fmri_img, confounds=confounds)
 
         fmri_imgs.append(fmri_img_conf)
@@ -45,8 +46,7 @@ for ses in sorted(seslist):
         allruns_events.append(pickle.load(f))
 
 
-# build model
-
+    # build model
     print('Fitting a GLM')
     fmri_glm = FirstLevelModel(t_r=1.49,
                                noise_model='ar1',
@@ -55,9 +55,27 @@ for ses in sorted(seslist):
                                drift_model=None,
                                high_pass=.01,
                                n_jobs=16,
-                               smoothing_fwhm=5)
-    fmri_glm = fmri_glm.fit(fmri_imgs, allruns_events)
+                               smoothing_fwhm=5,
+                               mask_img=anat_fname)
+    fmri_glm = fmri_glm.fit(fmri_imgs, allruns_events, confounds=confounds)
     report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
+    report.save_as_html('/home/hyruuk/GitHub/neuromod/hyruuk_shinobi_behav/reports/{}_{}_LmR_flm.html'.format(sub, ses))
+
+    # get stats map
+    z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
+        output_type='z_score', stat_type='F')
+
+    # compute thresholds
+    clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
+    uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
+
+    # save images
+    print('Generating views')
+    view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR=0.05), Noyaux > 10 voxels')
+    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+    # save also uncorrected map
+    view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
+    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub, ses))
 
 '''
 # get stats map
@@ -73,6 +91,5 @@ print('Generating views')
 view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR=0.05), Noyaux > 10 voxels')
 view.save_as_html(figures_path + '/{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub))
 
-view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-view.save_as_html(figures_path + '/{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub))
+
 '''
