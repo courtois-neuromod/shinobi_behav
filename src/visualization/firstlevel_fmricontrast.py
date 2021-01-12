@@ -25,10 +25,11 @@ dpath = path_to_data + 'shinobi/'
 seslist= os.listdir(dpath + sub)
 
 # load nifti imgs
-fmri_imgs = []
-confounds = []
 for ses in sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
+    fmri_imgs = []
+    design_matrices = []
+    confounds = []
     print('Processing {}'.format(ses))
     print(runs)
     for run in sorted(runs):
@@ -39,14 +40,38 @@ for ses in sorted(seslist):
         fmri_img = image.concat_imgs(data_fname)
         masker = NiftiMasker()
         masker.fit(anat_fname)
-        confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
-        fmri_img_conf = masker.transform(fmri_img, confounds=confounds)
-
-        fmri_imgs.append(fmri_img_conf)
+        confounds.append([pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname))])
+        fmri_imgs.append(fmri_img)
 
     # load events
     with open(dpath + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
         allruns_events.append(pickle.load(f))
+
+    # create design matrices
+    for run in sorted(runs):
+        t_r = 1.49
+        n_slices = fmri_imgs[run].shape[-1]
+        frame_times = np.arange(n_slices) * t_r
+
+        design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
+                                                                               events=allruns_events[run],
+                                                                              drift_model=None) # note, there will probably be something to do about that when the confounds will be added
+        LeftH_ts = np.asarray(design_matrix['LeftH'])
+        RightH_ts = np.asarray(design_matrix['RightH'])
+
+        b, a = signal.butter(3, 0.01, btype='high')
+        LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
+        RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
+        LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
+        RightH_ts_hpf_z = zscore(RightH_ts_hpf)
+
+        design_matrix['LeftH'] = LeftH_ts_hpf_z
+        design_matrix['RightH'] = RightH_ts_hpf_z
+
+        for idx, con in enumerate(np.asarray(confounds[run]).squeeze().T):
+            design_matrix[idx] = con
+        design_matrices.append(design_matrix)
+
 
 
     # build model
@@ -60,7 +85,7 @@ for ses in sorted(seslist):
                                n_jobs=16,
                                smoothing_fwhm=5,
                                mask_img=anat_fname)
-    fmri_glm = fmri_glm.fit(fmri_imgs, allruns_events, confounds=confounds)
+    fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
     report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
     report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
 
