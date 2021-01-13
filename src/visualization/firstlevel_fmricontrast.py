@@ -15,6 +15,9 @@ import load_confounds
 import pickle
 
 
+
+
+
  # Set constants
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
@@ -23,7 +26,6 @@ dpath = path_to_data + 'shinobi/'
 
 
 seslist= os.listdir(dpath + sub)
-
 # load nifti imgs
 for ses in sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
@@ -44,7 +46,7 @@ for ses in sorted(seslist):
         fmri_imgs.append(fmri_img)
 
     # load events
-    with open(dpath + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
+    with open(path_to_data + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
         allruns_events.append(pickle.load(f))
 
     # create design matrices
