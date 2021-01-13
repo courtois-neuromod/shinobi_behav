@@ -50,13 +50,13 @@ for ses in sorted(seslist):
         allruns_events = pickle.load(f)
 
     # create design matrices
-    for run in sorted(runs):
+    for idx, run in enumerate(sorted(runs)):
         t_r = 1.49
-        n_slices = fmri_imgs[run].shape[-1]
+        n_slices = fmri_imgs[idx].shape[-1]
         frame_times = np.arange(n_slices) * t_r
 
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
-                                                                               events=allruns_events[run],
+                                                                               events=allruns_events[idx],
                                                                               drift_model=None) # note, there will probably be something to do about that when the confounds will be added
         LeftH_ts = np.asarray(design_matrix['LeftH'])
         RightH_ts = np.asarray(design_matrix['RightH'])
@@ -70,8 +70,8 @@ for ses in sorted(seslist):
         design_matrix['LeftH'] = LeftH_ts_hpf_z
         design_matrix['RightH'] = RightH_ts_hpf_z
 
-        for idx, con in enumerate(np.asarray(confounds[run]).squeeze().T):
-            design_matrix[idx] = con
+        for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
+            design_matrix[idx_con] = con
         design_matrices.append(design_matrix)
 
 
