@@ -1,6 +1,5 @@
 import pandas as pd
 import os.path as op
-
 import matplotlib.pyplot as plt
 from src.params import figures_path, path_to_data
 from nilearn import plotting
@@ -14,6 +13,8 @@ from nilearn.input_data import NiftiMasker
 import load_confounds
 import pickle
 import nilearn
+from scipy import signal
+from scipy.stats import zscore
 
 
 
