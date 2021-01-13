@@ -47,7 +47,7 @@ for ses in sorted(seslist):
 
     # load events
     with open(path_to_data + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
-        allruns_events.append(pickle.load(f))
+        allruns_events = pickle.load(f)
 
     # create design matrices
     for run in sorted(runs):
