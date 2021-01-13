@@ -13,6 +13,7 @@ from nilearn.glm.first_level import FirstLevelModel
 from nilearn.input_data import NiftiMasker
 import load_confounds
 import pickle
+import nilearn
 
 
 
