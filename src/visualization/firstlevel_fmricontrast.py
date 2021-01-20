@@ -79,7 +79,7 @@ for ses in sorted(seslist):
         design_matrix['LeftH'] = LeftH_ts_hpf_z
         design_matrix['RightH'] = RightH_ts_hpf_z
 
-        new_idx_con = 1
+        new_idx_con = 0
         for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
             if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
                 design_matrix[idx_con] = con
