@@ -83,6 +83,7 @@ for ses in sorted(seslist):
         for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
             if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
                 design_matrix[idx_con] = con
+                new_idx_con = new_idx_con + 1
 
         design_matrices.append(design_matrix)
 
