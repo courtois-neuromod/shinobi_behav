@@ -44,22 +44,28 @@ for ses in sorted(seslist):
         fmri_img = image.concat_imgs(data_fname)
         masker = NiftiMasker()
         masker.fit(anat_fname)
-        confounds.append([pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname))])
+        confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
         fmri_imgs.append(fmri_img)
 
     # load events
     with open(path_to_data + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
         allruns_events = pickle.load(f)
 
+
+    # find the shortest run and retain it's number of confounds
+    #conf_lengths = []
+    #for con in confounds:
+    #    conf_lengths.append(con.shape[1])
+
     # create design matrices
     for idx, run in enumerate(sorted(runs)):
         t_r = 1.49
-        n_slices = fmri_imgs[idx].shape[-1]
+        n_slices = confounds[idx].shape[0]
         frame_times = np.arange(n_slices) * t_r
 
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
                                                                                events=allruns_events[idx],
-                                                                              drift_model=None) # note, there will probably be something to do about that when the confounds will be added
+                                                                              drift_model=None)
         LeftH_ts = np.asarray(design_matrix['LeftH'])
         RightH_ts = np.asarray(design_matrix['RightH'])
 
