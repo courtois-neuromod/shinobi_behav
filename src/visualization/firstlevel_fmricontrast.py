@@ -53,9 +53,10 @@ for ses in sorted(seslist):
 
 
     # find the shortest run and retain it's number of confounds
-    #conf_lengths = []
-    #for con in confounds:
-    #    conf_lengths.append(con.shape[1])
+    conf_lengths = []
+    for con in confounds:
+        conf_lengths.append(con.shape[1])
+    conf_minlen = np.min(conf_lengths)
 
     # create design matrices
     for idx, run in enumerate(sorted(runs)):
@@ -78,8 +79,11 @@ for ses in sorted(seslist):
         design_matrix['LeftH'] = LeftH_ts_hpf_z
         design_matrix['RightH'] = RightH_ts_hpf_z
 
+        new_idx_con = 1
         for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
-            design_matrix[idx_con] = con
+            if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
+                design_matrix[idx_con] = con
+
         design_matrices.append(design_matrix)
 
 
