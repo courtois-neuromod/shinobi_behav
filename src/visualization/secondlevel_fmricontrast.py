@@ -29,7 +29,7 @@ dpath = path_to_data + 'shinobi/'
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in sorted(seslist):
+for ses in ['ses-005', 'ses-006', 'ses-007', 'ses-008']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
@@ -122,7 +122,7 @@ for ses in sorted(seslist):
 
     report = second_level_model.generate_report(contrasts=['intercept'])
     report.save_as_html(figures_path + '/{}_{}_LmR_slm.html'.format(sub, ses))
-    
+
     # compute thresholds
     clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
     uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
