@@ -29,7 +29,7 @@ dpath = path_to_data + 'shinobi/'
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in sorted(seslist):
+for ses in ['ses-005', 'ses-006', 'ses-007', 'ses-008']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
