@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-pbellec
 #SBATCH --time=12:00:00
-#SBATCH --job-name=shinobi_firstlevel_fmricontrast
+#SBATCH --job-name=shinobi_secondlevel_fmricontrast
 #SBATCH --mem=64G
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
