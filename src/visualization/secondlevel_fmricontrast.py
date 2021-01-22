@@ -122,7 +122,7 @@ for ses in sorted(seslist):
 
     report = second_level_model.generate_report(contrasts=['intercept'])
     report.save_as_html(figures_path + '/{}_{}_LmR_slm.html'.format(sub, ses))
-    
+
     # compute thresholds
     clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
     uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
@@ -130,7 +130,7 @@ for ses in sorted(seslist):
     # save images
     print('Generating views')
     view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+    view.save_as_html(figures_path + '/{}_{}_LmR_slm_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
     # save also uncorrected map
     view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub, ses))
+    view.save_as_html(figures_path + '/{}_{}_LmR_slm_allruns_uncorr_fwhm5.html'.format(sub, ses))

@@ -34,6 +34,7 @@ for ses in sorted(seslist):
     fmri_imgs = []
     design_matrices = []
     confounds = []
+    confounds_cnames = []
     print('Processing {}'.format(ses))
     print(runs)
     for run in sorted(runs):
@@ -46,7 +47,9 @@ for ses in sorted(seslist):
         masker.fit(anat_fname)
         confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
         fmri_imgs.append(fmri_img)
-
+        conf=load_confounds.Params36()
+        conf.load(confounds_fname)
+        confounds_cnames.append(conf.columns_)
     # load events
     with open(path_to_data + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
         allruns_events = pickle.load(f)
@@ -68,7 +71,7 @@ for ses in sorted(seslist):
                                                                                events=allruns_events[idx],
                                                                               drift_model=None,
                                                                               add_regs=confounds[idx],
-                                                                              add_reg_names=confounds[idx].columns_)
+                                                                              add_reg_names=confounds_cnames[idx])
         LeftH_ts = np.asarray(design_matrix['LeftH'])
         RightH_ts = np.asarray(design_matrix['RightH'])
 
@@ -92,32 +95,34 @@ for ses in sorted(seslist):
 
 
     # build model
-    print('Fitting a GLM')
-    fmri_glm = FirstLevelModel(t_r=1.49,
-                               noise_model='ar1',
-                               standardize=False,
-                               hrf_model='spm',
-                               drift_model=None,
-                               high_pass=.01,
-                               n_jobs=16,
-                               smoothing_fwhm=5,
-                               mask_img=anat_fname)
-    fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
-    report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
-    report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
+    try:
+        print('Fitting a GLM')
+        fmri_glm = FirstLevelModel(t_r=1.49,
+                                   noise_model='ar1',
+                                   standardize=False,
+                                   hrf_model='spm',
+                                   drift_model=None,
+                                   high_pass=.01,
+                                   n_jobs=16,
+                                   smoothing_fwhm=5,
+                                   mask_img=anat_fname)
+        fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
+        report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
+        report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
 
-    # get stats map
-    z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
-        output_type='z_score', stat_type='F')
+        # get stats map
+        z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
+            output_type='z_score', stat_type='F')
 
-    # compute thresholds
-    clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
-    uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
+        # compute thresholds
+        clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
+        uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
 
-    # save images
-    print('Generating views')
-    view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
-    # save also uncorrected map
-    view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub, ses))
+        # save images
+        print('Generating views')
+        view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+        # save also uncorrected map
+        view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm_allruns_uncorr_fwhm5.html'.format(sub, ses))
+    except Exception as e: print(e)
