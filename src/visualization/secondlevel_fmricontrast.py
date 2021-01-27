@@ -130,7 +130,7 @@ for ses in ['ses-005', 'ses-006', 'ses-007', 'ses-008']:#sorted(seslist):
     # save images
     print('Generating views')
     view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+    view.save_as_html(figures_path + '/{}_{}_LmR_slm_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
     # save also uncorrected map
     view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-    view.save_as_html(figures_path + '/{}_{}_LmR_statsmap_allruns_uncorr_fwhm5.html'.format(sub, ses))
+    view.save_as_html(figures_path + '/{}_{}_LmR_slm_allruns_uncorr_fwhm5.html'.format(sub, ses))
