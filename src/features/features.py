@@ -29,7 +29,7 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
             data_dict = pickle.load(f)
     return data_dict
 
-def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, health_lost=False, max_score=False, completion_prob=False, completion_speed=False):
+def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, health_lost=False, max_score=False, completion_prob=False, completion_perc=False, completion_speed=False):
     '''
     Aggregate variables into features and store them in a dict
     '''
@@ -39,8 +39,8 @@ def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, he
         data_dict['Days of training'] = compute_days_of_train(allvars)
         print('Days of training computed')
     else:
-        data_dict['Passation order'] =  [x for x in range(len(allvars['filename']))]
-        print('Passation order computed')
+        data_dict['Passage order'] =  [x for x in range(len(allvars['filename']))]
+        print('Passage order computed')
     if rel_speed:
         data_dict['Relative speed'] = compute_rel_speed(allvars)
         print('Relative speed computed')
@@ -53,6 +53,9 @@ def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, he
     if completion_prob:
         data_dict['Completion prob'] = compute_completed(allvars)
         print('Completion probability computed')
+    if completion_perc:
+        data_dict['Percent complete'] = compute_completed_perc(allvars)
+        print('Completion percentage computed')
     if completion_speed:
         data_dict['Completion speed'] = compute_time2complete(allvars)
         print('Completion speed computed')
@@ -116,11 +119,11 @@ def compute_health_lost(allvars):
 
 def compute_completed(allvars):
     '''
-    Here we use "reach somewhere around the end of the level" as a proxy for complete
+    Here we use "ended the level without losing a life" as a proxy for completed levels
 
     Inputs :
     allvars = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = pendant la conversationframes
+    level1 lists = reps and level2 lists = frames
 
     Outputs :
     completed = list with one element per repetition (0 for repetition failed, 1 for repetition completed)
@@ -133,6 +136,35 @@ def compute_completed(allvars):
         else:
             completed.append(0)
     return completed
+
+def compute_completed_perc(allvars):
+    '''
+    Here we use "reach somewhere around the end of the level" as a proxy for complete
+
+    Inputs :
+    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    level1 lists = reps and level2 lists = frames
+
+    Outputs :
+    completed = list with one element per repetition (min 0 max 100)
+    '''
+    # Clean the X_player variable
+    X_player = fix_position_resets(allvars['X_player'])
+
+    # Find max value of X_player across all repetitions (that means that we assume that the level was completed at least once in our data)
+    max_X = []
+    for rep in X_player:
+        max_X.append(np.max(rep))
+
+    end_of_level = np.max(max_X) - 100 # lets assume that the level is completed when the player reaches end_of_level - 100, because there is some variance here due to the boss fights
+
+    completed_perc = []
+    # Now store the end position of each repetition and write it as percent of end_of_level
+    for curr_X in max_X:
+        if curr_X > end_of_level:
+            curr_X = end_of_level
+        completed_perc = curr_X/end_of_level*100
+    return completed_perc
 
 def compute_time2complete(allvars):
     '''
