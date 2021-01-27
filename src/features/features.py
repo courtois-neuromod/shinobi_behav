@@ -163,7 +163,7 @@ def compute_completed_perc(allvars):
     for curr_X in max_X:
         if curr_X > end_of_level:
             curr_X = end_of_level
-        completed_perc = curr_X/end_of_level*100
+        completed_perc.append(curr_X/end_of_level*100)
     return completed_perc
 
 def compute_time2complete(allvars):
