@@ -4,14 +4,18 @@ import os.path as op
 import pickle
 import os
 import json
-from src.features.features import compute_max_score
-
+from src.features.features import aggregate_vars
 
 def retrieve_variables(files, level, bids=True, by_timestamps=True):
     '''
-    files : list of files with complete path
+    TODO : clean the timestamps for non-bids files
+    Retrieves all the variables from a list of bk2 files and creates the allvars structure.
 
-    variable_lists : dictionnary (each variable is an entry) containing list of arrays of
+    files : list of files with complete path
+    level : the level corresponding to the savestate used
+    bids : should be True for NUC sessions, False for scans
+
+    allvars : dictionnary (each variable is an entry) containing list of arrays of
     length corresponding to the number of frames in each run,
     with runs ordered by timestamp.
     '''
@@ -84,12 +88,13 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
         for variable in run_variables.keys():
             variables_lists[variable].append(run_variables[variable])
     env.close()
-    return variables_lists
+    allvars = variables_lists
+    return allvars
 
 
-def combine_variables(path_to_data, subject, level, save=True):
+def combine_variables(path_to_data, subject, level, behav=True, save=True):
     '''
-    Load the allvars dict, create it if doesn't exists already.
+    Load the raw allvars dict, create it if doesn't exists already.
 
     Inputs :
     path_to_data = string, path to the main BIDS folder
@@ -100,23 +105,49 @@ def combine_variables(path_to_data, subject, level, save=True):
     Outputs :
     allvars = dict, keys are raw variables. Each entry contains a list of len() = n_repetitions_total, in which each element is a list of len() = n_frames
     '''
-    sessions = os.listdir(op.join(path_to_data, 'bids', subject))
-    files = []
-    for sess in sessions:
-        allfiles = os.listdir(op.join(path_to_data, 'bids', subject, sess, 'beh'))
-        for file in allfiles:
-            if 'level-{}'.format(level) in file:
-                if 'bk2' in file:
-                    files.append(op.join(path_to_data, 'bids', subject, sess, 'beh', file))
-    allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars.pkl'.format(subject, level))
-    if not(op.isfile(allvars_path)):
-        allvars = retrieve_variables(files, level, bids=True)
-        if save == True:
-            with open(allvars_path, 'wb') as f:
-                pickle.dump(allvars, f)
+
+    if behav:
+        # select appropriate files
+        sessions = os.listdir(op.join(path_to_data, 'bidsbehav', subject))
+        files = []
+        for sess in sessions:
+            allfiles = os.listdir(op.join(path_to_data, 'bidsbehav', subject, sess, 'beh'))
+            for file in allfiles:
+                if 'level-{}'.format(level) in file:
+                    if 'bk2' in file:
+                        files.append(op.join(path_to_data, 'bidsbehav', subject, sess, 'beh', file))
+        allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_behav.pkl'.format(subject, level))
+
+        # retrieve variables for the selected files
+        if not(op.isfile(allvars_path)):
+            allvars = retrieve_variables(files, level, bids=True)
+            if save == True:
+                with open(allvars_path, 'wb') as f:
+                    pickle.dump(allvars, f)
+        else:
+            with open(allvars_path, 'rb') as f:
+                allvars = pickle.load(f)
     else:
-        with open(allvars_path, 'rb') as f:
-            allvars = pickle.load(f)
+        # select appropriate files
+        sessions = os.listdir(op.join(path_to_data, 'shinobi', 'sourcedata', subject))
+        files = []
+        for sess in sorted(sessions):
+            allfiles = os.listdir(op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess))
+            for file in sorted(allfiles):
+                if 'Level{}'.format(level) in file:
+                    if 'bk2' in file:
+                        files.append(op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess, file))
+        allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subject, level))
+
+        # retrieve variables for the selected files
+        if not(op.isfile(allvars_path)):
+            allvars = retrieve_variables(files, level, bids=False, by_timestamps=False)
+            if save == True:
+                with open(allvars_path, 'wb') as f:
+                    pickle.dump(allvars, f)
+        else:
+            with open(allvars_path, 'rb') as f:
+                allvars = pickle.load(f)
     return allvars
 
 def remove_fake_reps(allvars):
