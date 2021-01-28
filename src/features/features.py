@@ -19,7 +19,7 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
                            health_lost=True,
                            max_score=True,
                            completion_prob=True,
-                           completion_speed=True,
+                           completion_perc=True,
                            days_of_train=days_of_train)
         if save == True:
             with open(data_dict_path, 'wb') as f:
