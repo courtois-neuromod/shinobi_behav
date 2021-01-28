@@ -60,7 +60,6 @@ for ses in sorted(seslist):
     for con in confounds:
         conf_lengths.append(con.shape[1])
     conf_minlen = np.min(conf_lengths)
-
     # create design matrices
     for idx, run in enumerate(sorted(runs)):
         t_r = 1.49
@@ -76,6 +75,9 @@ for ses in sorted(seslist):
                 new_confounds_cnames.append(confounds_cnames[idx][idx_con])
                 new_idx_con = new_idx_con + 1
 
+        print(confounds[idx].shape)
+        print(new_confounds.shape)
+        print(new_confounds_cnames.shape)
 
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
                                                                                events=allruns_events[idx],
