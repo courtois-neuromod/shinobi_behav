@@ -76,8 +76,9 @@ for ses in sorted(seslist):
                 new_idx_con = new_idx_con + 1
 
         print(confounds[idx].shape)
-        print(new_confounds.shape)
-        print(new_confounds_cnames.shape)
+        print(np.array(new_confounds).shape)
+        print(len(new_confounds_cnames))
+        print(type(confounds[idx]))
 
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
                                                                                events=allruns_events[idx],
