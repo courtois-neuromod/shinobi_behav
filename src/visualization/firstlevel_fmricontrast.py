@@ -68,12 +68,12 @@ for ses in sorted(seslist):
         frame_times = np.arange(n_slices) * t_r
 
         new_idx_con = 0
-        new_confoundss = []
+        new_confounds = []
         new_confounds_cnames = []
         for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
             if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
-                new_confounds­.append(con)
-                new_confounds_cnames.append(confounds_cnames[idx_con])
+                new_confounds.append(con)
+                new_confounds_cnames.append(confounds_cnames[idx][idx_con])
                 new_idx_con = new_idx_con + 1
 
 
