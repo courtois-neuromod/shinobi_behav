@@ -67,6 +67,16 @@ for ses in sorted(seslist):
         n_slices = confounds[idx].shape[0]
         frame_times = np.arange(n_slices) * t_r
 
+        new_idx_con = 0
+        new_confoundss = []
+        new_confounds_cnames = []
+        for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
+            if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
+                new_confounds­.append(con)
+                new_confounds_cnames.append(confounds_cnames[idx_con])
+                new_idx_con = new_idx_con + 1
+
+
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
                                                                                events=allruns_events[idx],
                                                                               drift_model=None,
@@ -83,12 +93,6 @@ for ses in sorted(seslist):
 
         design_matrix['LeftH'] = LeftH_ts_hpf_z
         design_matrix['RightH'] = RightH_ts_hpf_z
-
-#        new_idx_con = 0
-#        for idx_con, con in enumerate(np.asarray(confounds[idx]).squeeze().T):
-#            if idx_con < conf_minlen-12 or idx_con >= confounds[idx].shape[1]-12:
-#                design_matrix[idx_con] = con
-#                new_idx_con = new_idx_con + 1
 
         design_matrices.append(design_matrix)
 
@@ -108,7 +112,7 @@ for ses in sorted(seslist):
                                    mask_img=anat_fname)
         fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
         report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
-        report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
+        report.save_as_html(figures_path + '/{}_{}_LmR_flm-removedconfs.html'.format(sub, ses))
 
         # get stats map
         z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
@@ -121,8 +125,8 @@ for ses in sorted(seslist):
         # save images
         print('Generating views')
         view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm-removedconfs_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
         # save also uncorrected map
         view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm_allruns_uncorr_fwhm5.html'.format(sub, ses))
-    except Exception as e: print(e)
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm-removedconfs_allruns_uncorr_fwhm5.html'.format(sub, ses))
+    except Exception as e: print('--------------MODEL NOT COMPUTED----------------' + e)
