@@ -114,4 +114,4 @@ for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005', 'ses-006']:#sorted(sesli
         # save also uncorrected map
         view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
         view.save_as_html(figures_path + '/{}_{}_LmR_flm-notrick_allruns_uncorr_fwhm5.html'.format(sub, ses))
-    except Exception as e: print('--------------MODEL NOT COMPUTED----------------' + e)
+    except Exception as e: print(e)
