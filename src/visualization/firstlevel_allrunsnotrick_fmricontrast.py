@@ -65,8 +65,8 @@ for ses in sorted(seslist):
         design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
                                                                                events=allruns_events[idx],
                                                                               drift_model=None,
-                                                                              add_regs=confounds,
-                                                                              add_reg_names=confounds_cnames)
+                                                                              add_regs=confounds[idx],
+                                                                              add_reg_names=confounds_cnames[idx])
         LeftH_ts = np.asarray(design_matrix['LeftH'])
         RightH_ts = np.asarray(design_matrix['RightH'])
 
