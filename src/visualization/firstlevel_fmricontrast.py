@@ -29,7 +29,7 @@ dpath = path_to_data + 'shinobi/'
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in sorted(seslist):
+for ses in ['ses-005', 'ses-006', 'ses-007', 'ses-008']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
@@ -132,4 +132,4 @@ for ses in sorted(seslist):
         # save also uncorrected map
         view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
         view.save_as_html(figures_path + '/{}_{}_LmR_flm-removedconfs_allruns_uncorr_fwhm5.html'.format(sub, ses))
-    except Exception as e: print('--------------MODEL NOT COMPUTED----------------' + e)
+    except Exception as e: print(e)

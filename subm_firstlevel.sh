@@ -8,4 +8,4 @@
 
 module load python/3.8.0
 
-/lustre03/project/6003287/hyruuk/.virtualenvs/hyruuk_shinobi_behav/bin/python /project/rrg-pbellec/hyruuk/hyruuk_shinobi_behav/src/visualization/firstlevel_allrunsnotrick_fmricontrast.py
+/lustre03/project/6003287/hyruuk/.virtualenvs/hyruuk_shinobi_behav/bin/python /project/rrg-pbellec/hyruuk/hyruuk_shinobi_behav/src/visualization/firstlevel_fmricontrast.py
