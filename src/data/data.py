@@ -92,6 +92,69 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
     return allvars
 
 
+
+def retrieve_scanvariables(files):
+    # This is a modified version of src.data.data.retrieve_variables, adapted to the naming of scan-related behavioural files
+    '''
+    files : list of files with complete path
+
+    variable_lists : dictionnary (each variable is an entry) containing list of arrays of
+    length corresponding to the number of frames in each run,
+    with runs ordered by timestamp.
+    '''
+
+    variables_lists = {}
+
+    for file in files:
+        level = file[-11:-8]
+        timestamp = file[-73:-65]
+        print(file)
+        if level == '5-0':
+            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
+        else:
+            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
+        actions = env.buttons
+
+        run_variables = {}
+        key_log = retro.Movie(file)
+        env.reset()
+        run_completed = False
+        while key_log.step():
+            a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
+            _,_,done,i = env.step(a)
+
+            if variables_lists == {}: # init final dict
+                variables_lists['filename'] = []
+                variables_lists['timestamp'] = []
+                variables_lists['level'] = []
+                for action in actions:
+                    variables_lists[action] = []
+                for variable in i.keys():
+                    variables_lists[variable] = []
+
+            if run_variables == {}: # init temp dict
+                for variable in i.keys():
+                    run_variables[variable] = []
+                for action in actions:
+                    run_variables[action] = []
+
+            for variable in i.keys(): # fill up temp dict
+                run_variables[variable].append(i[variable])
+            for idx_a, action in enumerate(actions):
+                run_variables[action].append(a[idx_a])
+
+            if done == True:
+                run_completed = True
+        variables_lists['filename'].append(file)
+        variables_lists['timestamp'].append(timestamp)
+        variables_lists['level'].append(level)
+
+        for variable in run_variables.keys():
+            variables_lists[variable].append(run_variables[variable])
+        env.close()
+    return variables_lists
+
+
 def combine_variables(path_to_data, subject, level, behav=True, save=True):
     '''
     Load the raw allvars dict, create it if doesn't exists already.
