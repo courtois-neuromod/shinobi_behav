@@ -110,7 +110,7 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
     all_df = []
 
     for idx, onset_rep in enumerate(onset_reps):
-        print('Extracting events for {}'.format(runvars['filename'][idx]))
+        #print('Extracting events for {}'.format(runvars['filename'][idx]))
         if get_actions:
             # get the different possible actions
             # generate events for each of them
