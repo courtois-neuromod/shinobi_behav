@@ -52,7 +52,7 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
 
     for idx in sorted_idx:
         file = files[idx]
-        print(file)
+        #print(file)
         run_variables = {}
         key_log = retro.Movie(file)
         env.reset()
@@ -108,7 +108,7 @@ def retrieve_scanvariables(files):
     for file in files:
         level = file[-11:-8]
         timestamp = file[-73:-65]
-        print(file)
+        #print(file)
         if level == '5-0':
             env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
         else:
