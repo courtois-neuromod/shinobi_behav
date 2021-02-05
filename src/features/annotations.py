@@ -143,7 +143,7 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
     return events_df
 
 
-def trim_df(events_df, trim_by='LvR'):
+def trim_events_df(events_df, trim_by='LvR'):
     if trim_by=='LvR':
         # Create Left df
         lh_df = pd.concat([events_df[events_df['trial_type'] == '1_LEFT'],
