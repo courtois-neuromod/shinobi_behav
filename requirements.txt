@@ -17,3 +17,5 @@ nilearn
 nistats
 bids
 load_confounds
+seaborn
+statsmodels
