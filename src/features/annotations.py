@@ -142,6 +142,44 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
     events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
     return events_df
 
+
+def trim_df(events_df, trim_by='LvR'):
+    if trim_by=='LvR':
+        # Create Left df
+        lh_df = pd.concat([events_df[events_df['trial_type'] == '1_LEFT'],
+                           events_df[events_df['trial_type'] == '1_RIGHT'],
+                           events_df[events_df['trial_type'] == '1_DOWN'],
+                           events_df[events_df['trial_type'] == '1_UP'],
+                           events_df[events_df['trial_type'] == '4_LEFT'],
+                           events_df[events_df['trial_type'] == '4_RIGHT'],
+                           events_df[events_df['trial_type'] == '4_DOWN'],
+                           events_df[events_df['trial_type'] == '4_UP'],
+                            events_df[events_df['trial_type'] == '5_LEFT'],
+                           events_df[events_df['trial_type'] == '5_RIGHT'],
+                           events_df[events_df['trial_type'] == '5_DOWN'],
+                           events_df[events_df['trial_type'] == '5_UP']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        lh_df['trial_type'] = 'LeftH'
+
+        # Create Right df
+        rh_df = pd.concat([events_df[events_df['trial_type'] == '1_B'],
+                           events_df[events_df['trial_type'] == '1_C'],
+                           events_df[events_df['trial_type'] == '4_B'],
+                           events_df[events_df['trial_type'] == '4_C'],
+                            events_df[events_df['trial_type'] == '5_B'],
+                           events_df[events_df['trial_type'] == '5_C']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        rh_df['trial_type'] = 'RightH'
+
+        # Regroup and pass them
+        LvR_df = pd.concat([lh_df, rh_df]).sort_values(by='onset').reset_index(drop=True)
+        trimmed_df = LvR_df
+    return trimmed_df
+
+
+
+
+##########
 def plot_gameevents(LvR_df, colors='rand'):
     '''
      colors : can be 'rand, 'lvr' or specified by a list of 3-tuples
