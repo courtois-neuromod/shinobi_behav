@@ -103,15 +103,9 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
     onset_reps = startevents['onset'].values.tolist()
     dur_reps = startevents['duration'].values.tolist()
     lvl_reps = [x[-11] for x in startevents['stim_file'].values.tolist()]
-    print(onset_reps)
-    print(dur_reps)
-    print(lvl_reps)
-    if get_aps:
-        framewise_aps = compute_framewise_aps(runvars, actions=actions, FS=FS)
 
     # init df list
     all_df = []
-
     for idx, onset_rep in enumerate(onset_reps):
         print('Extracting events for {}'.format(runvars['filename'][idx]))
         if get_actions:
@@ -138,9 +132,9 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
         temp_df = startevents.drop('stim_file', axis=1)
         temp_df['trial_type'] = ['level_{}'.format(x) for x in lvl_reps]
         all_df.append(temp_df)
-        #todo : if get_endstart
-        #todo : if get_kills
-        #todo : if get_healthloss
+
+    #todo : if get_endstart
+    #todo : if get_kills
 
     events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
     return events_df
