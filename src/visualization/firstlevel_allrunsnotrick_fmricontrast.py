@@ -29,7 +29,7 @@ dpath = path_to_data + 'shinobi/'
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005', 'ses-006']:#sorted(seslist):
+for ses in ['ses-006', 'ses-007', 'ses-008', 'ses-001']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
@@ -96,7 +96,13 @@ for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005', 'ses-006']:#sorted(sesli
                                    smoothing_fwhm=5,
                                    mask_img=anat_fname)
         fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
+
+        cmap = fmri_glm.compute_contrast(['LeftH-RightH'],
+                                          stat_type='F',
+                                          output_type='z_score')
+        cmap.to_filename('data/processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses))
         report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
+
         report.save_as_html(figures_path + '/{}_{}_LmR_flm-notrick.html'.format(sub, ses))
 
         # get stats map
