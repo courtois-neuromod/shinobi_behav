@@ -29,7 +29,7 @@ dpath = path_to_data + 'shinobi/'
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005']:#sorted(seslist):
+for ses in ['ses-009', 'ses-010', 'ses-012', 'ses-013']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
@@ -103,7 +103,7 @@ for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005']:#sorted(seslist):
         cmap.to_filename('data/processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses))
         report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
 
-        report.save_as_html(figures_path + '/{}_{}_LmR_flm-notrick.html'.format(sub, ses))
+        report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
 
         # get stats map
         z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
@@ -116,8 +116,8 @@ for ses in ['ses-002', 'ses-003', 'ses-004', 'ses-005']:#sorted(seslist):
         # save images
         print('Generating views')
         view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm-notrick_allruns_FDRcluster_fwhm5.html'.format(sub, ses))
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm_FDRcluster_fwhm5.html'.format(sub, ses))
         # save also uncorrected map
         view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm-notrick_allruns_uncorr_fwhm5.html'.format(sub, ses))
+        view.save_as_html(figures_path + '/{}_{}_LmR_flm_uncorr_fwhm5.html'.format(sub, ses))
     except Exception as e: print(e)
