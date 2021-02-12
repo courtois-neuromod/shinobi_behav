@@ -59,4 +59,4 @@ view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (F
 view.save_as_html(figures_path + '/{}_LmR_slm_FDRcluster_fwhm5.html'.format(sub))
 # save also uncorrected map
 view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-view.save_as_html(figures_path + '/{}_{}_LmR_slm_uncorr_fwhm5.html'.format(sub))
+view.save_as_html(figures_path + '/{}_LmR_slm_uncorr_fwhm5.html'.format(sub))
