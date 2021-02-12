@@ -24,14 +24,14 @@ from scipy.stats import zscore
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-
+contrast = ['LeftH']
 
 
 seslist= os.listdir(dpath + sub)
 cmaps = []
 # load nifti imgs
 for ses in ['ses-001','ses-002','ses-003','ses-004','ses-005','ses-006','ses-007','ses-008']:#sorted(seslist):
-    cmap_name = path_to_data + 'processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses)
+    cmap_name = path_to_data + 'processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses)
     cmaps.append(cmap_name)
 
 
@@ -47,7 +47,7 @@ second_level_model = second_level_model.fit(second_level_input,
 z_map = second_level_model.compute_contrast(output_type='z_score')
 
 report = second_level_model.generate_report(contrasts=['intercept'])
-report.save_as_html(figures_path + '/{}_LmR_slm.html'.format(sub))
+report.save_as_html(figures_path + '/{}_{}_slm.html'.format(sub, contrast))
 
 # compute thresholds
 clean_map, threshold = map_threshold(z_map, alpha=.05, height_control='fdr', cluster_threshold=10)
@@ -56,7 +56,7 @@ uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
 # save images
 print('Generating views')
 view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-view.save_as_html(figures_path + '/{}_LmR_slm_FDRcluster_fwhm5.html'.format(sub))
+view.save_as_html(figures_path + '/{}_{}_slm_FDRcluster_fwhm5.html'.format(sub, contrast))
 # save also uncorrected map
 view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-view.save_as_html(figures_path + '/{}_LmR_slm_uncorr_fwhm5.html'.format(sub))
+view.save_as_html(figures_path + '/{}_{}_slm_uncorr_fwhm5.html'.format(sub, contrast))
