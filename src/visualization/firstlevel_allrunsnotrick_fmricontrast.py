@@ -24,12 +24,12 @@ from scipy.stats import zscore
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-
+contrast = ['LeftH']
 
 
 seslist= os.listdir(dpath + sub)
 # load nifti imgs
-for ses in ['ses-009', 'ses-010', 'ses-012', 'ses-013']:#sorted(seslist):
+for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
     runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
     fmri_imgs = []
     design_matrices = []
@@ -97,16 +97,16 @@ for ses in ['ses-009', 'ses-010', 'ses-012', 'ses-013']:#sorted(seslist):
                                    mask_img=anat_fname)
         fmri_glm = fmri_glm.fit(fmri_imgs, design_matrices=design_matrices)
 
-        cmap = fmri_glm.compute_contrast(['LeftH-RightH'],
+        cmap = fmri_glm.compute_contrast(contrast,
                                           stat_type='F',
                                           output_type='z_score')
-        cmap.to_filename('data/processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses))
-        report = fmri_glm.generate_report(contrasts=['LeftH-RightH'])
+        cmap.to_filename('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses))
+        report = fmri_glm.generate_report(contrasts=['LeftH'])
 
         report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
 
         # get stats map
-        z_map = fmri_glm.compute_contrast(['LeftH-RightH'],
+        z_map = fmri_glm.compute_contrast(contrast,
             output_type='z_score', stat_type='F')
 
         # compute thresholds
@@ -115,9 +115,9 @@ for ses in ['ses-009', 'ses-010', 'ses-012', 'ses-013']:#sorted(seslist):
 
         # save images
         print('Generating views')
-        view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm_FDRcluster_fwhm5.html'.format(sub, ses))
+        view = plotting.view_img(clean_map, threshold=3, title='Left Hand (FDR<0.05), Noyaux > 10 voxels')
+        view.save_as_html(figures_path + '/{}_{}_{}_flm_FDRcluster_fwhm5.html'.format(sub, ses, contrast))
         # save also uncorrected map
-        view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
-        view.save_as_html(figures_path + '/{}_{}_LmR_flm_uncorr_fwhm5.html'.format(sub, ses))
+        view = plotting.view_img(uncorr_map, threshold=3, title='Left Hand (p<0.001), uncorr')
+        view.save_as_html(figures_path + '/{}_{}_{}_flm_uncorr_fwhm5.html'.format(sub, ses, contrast))
     except Exception as e: print(e)
