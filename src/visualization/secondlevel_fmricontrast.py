@@ -31,7 +31,7 @@ seslist= os.listdir(dpath + sub)
 cmaps = []
 # load nifti imgs
 for ses in sorted(seslist):
-    cmap_name = dpath + 'processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses)
+    cmap_name = path_to_data + 'processed/cmaps/LeftH-RightH/{}_{}.nii.gz'.format(sub, ses)
     cmaps.append(cmap_name)
 
 
