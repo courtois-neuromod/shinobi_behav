@@ -24,7 +24,7 @@ from scipy.stats import zscore
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-contrast = ['LeftH']
+contrast = 'LeftH'
 
 
 seslist= os.listdir(dpath + sub)
@@ -101,9 +101,9 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
                                           stat_type='F',
                                           output_type='z_score')
         cmap.to_filename('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses))
-        report = fmri_glm.generate_report(contrasts=['LeftH'])
+        report = fmri_glm.generate_report(contrasts=[contrast])
 
-        report.save_as_html(figures_path + '/{}_{}_LmR_flm.html'.format(sub, ses))
+        report.save_as_html(figures_path + '/{}_{}_{}_flm.html'.format(sub, ses, contrast))
 
         # get stats map
         z_map = fmri_glm.compute_contrast(contrast,
