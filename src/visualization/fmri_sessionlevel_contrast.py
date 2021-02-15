@@ -101,8 +101,8 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
                                           stat_type='F',
                                           output_type='z_score')
         cmap.to_filename('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses))
+        print('cmap saved')
         report = fmri_glm.generate_report(contrasts=[contrast])
-
         report.save_as_html(figures_path + '/{}_{}_{}_flm.html'.format(sub, ses, contrast))
 
         # get stats map
