@@ -15,7 +15,7 @@ import pickle
 import nilearn
 from scipy import signal
 from scipy.stats import zscore
-
+from src.features.annotations import trim_events_df
 
 
 
@@ -24,7 +24,7 @@ from scipy.stats import zscore
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-contrast = 'LeftH'
+contrast = 'HealthLoss'
 
 
 seslist= os.listdir(dpath + sub)
@@ -35,6 +35,7 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
     design_matrices = []
     confounds = []
     confounds_cnames = []
+    allruns_events = []
     print('Processing {}'.format(ses))
     print(runs)
     for run in sorted(runs):
@@ -50,9 +51,11 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
         conf=load_confounds.Params36()
         conf.load(confounds_fname)
         confounds_cnames.append(conf.columns_)
-    # load events
-    with open(path_to_data + '{}_{}_events_files.pkl'.format(sub, ses), 'rb') as f:
-        allruns_events = pickle.load(f)
+        # load events
+        with open(path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run), 'rb') as f:
+            run_events = pickle.load(f)
+        trimmed_df = trim_events_df(run_events, trim_by='healthloss')
+        allruns_events.append(trimmed_df)
 
 
 
@@ -67,17 +70,18 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
                                                                               drift_model=None,
                                                                               add_regs=confounds[idx],
                                                                               add_reg_names=confounds_cnames[idx])
-        LeftH_ts = np.asarray(design_matrix['LeftH'])
-        RightH_ts = np.asarray(design_matrix['RightH'])
+        if 'Left' in contrast or 'Right' in contrast: 
+            LeftH_ts = np.asarray(design_matrix['LeftH'])
+            RightH_ts = np.asarray(design_matrix['RightH'])
 
-        b, a = signal.butter(3, 0.01, btype='high')
-        LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
-        RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
-        LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
-        RightH_ts_hpf_z = zscore(RightH_ts_hpf)
+            b, a = signal.butter(3, 0.01, btype='high')
+            LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
+            RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
+            LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
+            RightH_ts_hpf_z = zscore(RightH_ts_hpf)
 
-        design_matrix['LeftH'] = LeftH_ts_hpf_z
-        design_matrix['RightH'] = RightH_ts_hpf_z
+            design_matrix['LeftH'] = LeftH_ts_hpf_z
+            design_matrix['RightH'] = RightH_ts_hpf_z
 
         design_matrices.append(design_matrix)
 

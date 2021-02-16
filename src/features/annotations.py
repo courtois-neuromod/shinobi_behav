@@ -170,30 +170,76 @@ def trim_events_df(events_df, trim_by='LvR'):
                            events_df[events_df['trial_type'] == '5_C']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_df['trial_type'] = 'RightH'
-
         # Regroup and pass them
-        LvR_df = pd.concat([lh_df, rh_df]).sort_values(by='onset').reset_index(drop=True)
-        trimmed_df = LvR_df
+        trimmed_df = pd.concat([lh_df, rh_df]).sort_values(by='onset').reset_index(drop=True)
+
+    if trim_by=='event':
+        # mostly for plotting I guess
+        lh_l = pd.concat([ events_df[events_df['trial_type'] == '1_LEFT'],
+                           events_df[events_df['trial_type'] == '4_LEFT'],
+                           events_df[events_df['trial_type'] == '5_LEFT']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        lh_l['trial_type'] = 'Left hand - Move left'
+        lh_r = pd.concat([ events_df[events_df['trial_type'] == '1_RIGHT'],
+                           events_df[events_df['trial_type'] == '4_RIGHT'],
+                           events_df[events_df['trial_type'] == '5_RIGHT']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        lh_r['trial_type'] = 'Left hand - Move right'
+        lh_d = pd.concat([ events_df[events_df['trial_type'] == '1_DOWN'],
+                           events_df[events_df['trial_type'] == '4_DOWN'],
+                           events_df[events_df['trial_type'] == '5_DOWN'],
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        lh_d['trial_type'] = 'Left hand - Move down'
+        lh_u = pd.concat([ events_df[events_df['trial_type'] == '1_UP'],
+                           events_df[events_df['trial_type'] == '4_UP'],
+                           events_df[events_df['trial_type'] == '5_UP']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        lh_u['trial_type'] = 'Left hand - Move up'
+        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1_B'],
+                           events_df[events_df['trial_type'] == '4_B'],
+                            events_df[events_df['trial_type'] == '5_B']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        rh_jump['trial_type'] = 'Right hand - Jump'
+        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1_C'],
+                           events_df[events_df['trial_type'] == '4_C'],
+                           events_df[events_df['trial_type'] == '5_C']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        rh_hit['trial_type'] = 'Right hand - Hit'
+        hl = pd.concat([events_df[events_df['trial_type'] == '1_HealthLoss'],
+                           events_df[events_df['trial_type'] == '4_HealthLoss'],
+                           events_df[events_df['trial_type'] == '5_HealthLoss']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        hl['trial_type'] = 'Health loss'
+        trimmed_df = pd.concat([lh_l, lh_r, lh_u, lh_d, rh_jump, rh_hit, hl]).sort_values(by='onset').reset_index(drop=True)
+
+    if trim_by=='healthloss':
+        hl = pd.concat([events_df[events_df['trial_type'] == '1_HealthLoss'],
+                           events_df[events_df['trial_type'] == '4_HealthLoss'],
+                           events_df[events_df['trial_type'] == '5_HealthLoss']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        hl['trial_type'] = 'HealthLoss'
+        trimmed_df = hl
+
     return trimmed_df
 
 
 
 
 ##########
-def plot_gameevents(LvR_df, colors='rand'):
+def plot_gameevents(events_df, colors='rand'):
     '''
-     colors : can be 'rand, 'lvr' or specified by a list of 3-tuples
+     colors : can be 'rand, 'lvr' or specified by a list of 3-tuples with a length corresponding to the number of event_types
      if 'lvr' : Left vs Right hand, colors will be forced to match between different buttons of the same hand
     '''
 
     matplotlib.rc('xtick', labelsize=20)
     matplotlib.rc('ytick', labelsize=40)
 
-    trial_types = sorted(list(LvR_df.trial_type.unique()))
+    trial_types = sorted(list(events_df.trial_type.unique()))
 
     event_ends = []
-    for i in range(len(LvR_df['onset'])):
-        event_ends.append(LvR_df['onset'][i] + LvR_df['duration'][i])
+    for i in range(len(events_df['onset'])):
+        event_ends.append(events_df['onset'][i] + events_df['duration'][i])
 
     total_duration = max(event_ends)
     time_axis = np.linspace(0, total_duration, 10000)
