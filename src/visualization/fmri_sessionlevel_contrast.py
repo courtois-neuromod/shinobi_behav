@@ -25,8 +25,8 @@ sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
 contrast = 'HealthLoss'
-if not os.path.isdir(path_to_data + 'processed/annotations/' + contrast):
-    os.mkdir(path_to_data + 'processed/annotations/' + contrast)
+if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
+    os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
 
 
 seslist= os.listdir(dpath + sub)
