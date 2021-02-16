@@ -24,7 +24,7 @@ from scipy.stats import zscore
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-contrast = ['LeftH']
+contrast = 'RightH'
 
 
 seslist= os.listdir(dpath + sub)
@@ -55,8 +55,8 @@ uncorr_map, threshold = map_threshold(z_map, alpha=.001, height_control='fpr')
 
 # save images
 print('Generating views')
-view = plotting.view_img(clean_map, threshold=3, title='Left minus Right Hand (FDR<0.05), Noyaux > 10 voxels')
+view = plotting.view_img(clean_map, threshold=3, title='{} contrast (FDR<0.05), Noyaux > 10 voxels'.format(contrast))
 view.save_as_html(figures_path + '/{}_{}_slm_FDRcluster_fwhm5.html'.format(sub, contrast))
 # save also uncorrected map
-view = plotting.view_img(uncorr_map, threshold=3, title='Left minus Right Hand (p<0.001), uncorr')
+view = plotting.view_img(uncorr_map, threshold=3, title='{} contrast (p<0.001), uncorr'.format(contrast))
 view.save_as_html(figures_path + '/{}_{}_slm_uncorr_fwhm5.html'.format(sub, contrast))
