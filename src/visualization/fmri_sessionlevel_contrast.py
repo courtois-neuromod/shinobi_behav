@@ -54,7 +54,10 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
         # load events
         with open(path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run), 'rb') as f:
             run_events = pickle.load(f)
-        trimmed_df = trim_events_df(run_events, trim_by='healthloss')
+        if 'Left' in contrast or 'Right' in contrast:
+            trimmed_df = trim_events_df(run_events, trim_by='LvR')
+        else:
+            trimmed_df = trim_events_df(run_events, trim_by='event')
         allruns_events.append(trimmed_df)
 
 
@@ -70,7 +73,7 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
                                                                               drift_model=None,
                                                                               add_regs=confounds[idx],
                                                                               add_reg_names=confounds_cnames[idx])
-        if 'Left' in contrast or 'Right' in contrast: 
+        if 'Left' in contrast or 'Right' in contrast:
             LeftH_ts = np.asarray(design_matrix['LeftH'])
             RightH_ts = np.asarray(design_matrix['RightH'])
 
