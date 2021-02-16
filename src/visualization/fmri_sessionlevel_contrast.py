@@ -59,7 +59,7 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
         if 'Left' in contrast or 'Right' in contrast:
             trimmed_df = trim_events_df(run_events, trim_by='LvR')
         else:
-            trimmed_df = trim_events_df(run_events, trim_by='event')
+            trimmed_df = trim_events_df(run_events, trim_by='healthloss')
         allruns_events.append(trimmed_df)
 
 
