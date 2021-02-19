@@ -124,9 +124,9 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
 
         # save images
         print('Generating views')
-        view = plotting.view_img(clean_map, threshold=3, title='Left Hand (FDR<0.05), Noyaux > 10 voxels')
+        view = plotting.view_img(clean_map, threshold=3, title='{} (FDR<0.05), Noyaux > 10 voxels'.format(contrast))
         view.save_as_html(figures_path + '/{}_{}_{}_flm_FDRcluster_fwhm5.html'.format(sub, ses, contrast))
         # save also uncorrected map
-        view = plotting.view_img(uncorr_map, threshold=3, title='Left Hand (p<0.001), uncorr')
+        view = plotting.view_img(uncorr_map, threshold=3, title='{} (p<0.001), uncorr'.format(contrast))
         view.save_as_html(figures_path + '/{}_{}_{}_flm_uncorr_fwhm5.html'.format(sub, ses, contrast))
     except Exception as e: print(e)

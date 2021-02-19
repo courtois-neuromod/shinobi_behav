@@ -30,7 +30,7 @@ contrast = 'RightH'
 seslist= os.listdir(dpath + sub)
 cmaps = []
 # load nifti imgs
-for ses in ['ses-001','ses-002','ses-003','ses-004','ses-005','ses-006','ses-007','ses-008']:#sorted(seslist):
+for ses in ['ses-002','ses-003','ses-004','ses-005','ses-006','ses-007','ses-008']:#sorted(seslist):
     cmap_name = path_to_data + 'processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses)
     cmaps.append(cmap_name)
 
