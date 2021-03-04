@@ -174,7 +174,7 @@ def trim_events_df(events_df, trim_by='LvR'):
         trimmed_df = pd.concat([lh_df, rh_df]).sort_values(by='onset').reset_index(drop=True)
 
     if trim_by=='event':
-        # mostly for plotting I guess
+        # mostly for plotting
         lh_l = pd.concat([ events_df[events_df['trial_type'] == '1_LEFT'],
                            events_df[events_df['trial_type'] == '4_LEFT'],
                            events_df[events_df['trial_type'] == '5_LEFT']
@@ -219,6 +219,20 @@ def trim_events_df(events_df, trim_by='LvR'):
                           ]).sort_values(by='onset').reset_index(drop=True)
         hl['trial_type'] = 'HealthLoss'
         trimmed_df = hl
+
+    if trim_by=='JvH':
+        # Create Left df
+        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1_B'],
+                           events_df[events_df['trial_type'] == '4_B'],
+                            events_df[events_df['trial_type'] == '5_B']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        rh_jump['trial_type'] = 'Jump'
+        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1_C'],
+                           events_df[events_df['trial_type'] == '4_C'],
+                           events_df[events_df['trial_type'] == '5_C']
+                          ]).sort_values(by='onset').reset_index(drop=True)
+        rh_hit['trial_type'] = 'Hit'
+        trimmed_df = pd.concat([rh_jump, rh_hit]).sort_values(by='onset').reset_index(drop=True)
 
     return trimmed_df
 

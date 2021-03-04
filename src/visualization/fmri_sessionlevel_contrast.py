@@ -24,7 +24,7 @@ from src.features.annotations import trim_events_df
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-contrast = 'HealthLoss'
+contrast = 'Jump'
 if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
     os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
 
@@ -58,6 +58,8 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
             run_events = pickle.load(f)
         if 'Left' in contrast or 'Right' in contrast:
             trimmed_df = trim_events_df(run_events, trim_by='LvR')
+        elif 'Jump' in contrast or 'Right' in contrast:
+            trimmed_df = trim_events_df(run_events, trim_by='JvH')
         else:
             trimmed_df = trim_events_df(run_events, trim_by='healthloss')
         allruns_events.append(trimmed_df)
