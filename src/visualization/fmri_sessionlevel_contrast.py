@@ -58,7 +58,7 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
             run_events = pickle.load(f)
         if 'Left' in contrast or 'Right' in contrast:
             trimmed_df = trim_events_df(run_events, trim_by='LvR')
-        elif 'Jump' in contrast or 'Right' in contrast:
+        elif 'Jump' in contrast or 'Hit' in contrast:
             trimmed_df = trim_events_df(run_events, trim_by='JvH')
         else:
             trimmed_df = trim_events_df(run_events, trim_by='healthloss')
@@ -76,19 +76,23 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
                                                                                events=allruns_events[idx],
                                                                               drift_model=None,
                                                                               add_regs=confounds[idx],
-                                                                              add_reg_names=confounds_cnames[idx])
+                                                                          add_reg_names=confounds_cnames[idx])
+        b, a = signal.butter(3, 0.01, btype='high')
+
         if 'Left' in contrast or 'Right' in contrast:
             LeftH_ts = np.asarray(design_matrix['LeftH'])
             RightH_ts = np.asarray(design_matrix['RightH'])
-
-            b, a = signal.butter(3, 0.01, btype='high')
             LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
             RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
             LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
             RightH_ts_hpf_z = zscore(RightH_ts_hpf)
-
             design_matrix['LeftH'] = LeftH_ts_hpf_z
             design_matrix['RightH'] = RightH_ts_hpf_z
+
+        if 'Jump' in contrast or 'Hit' in contrast:
+            design_matrix['Jump'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Jump'])))
+            design_matrix['Hit'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Hit'])))
+
 
         design_matrices.append(design_matrix)
 
