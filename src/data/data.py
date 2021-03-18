@@ -64,6 +64,7 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
             if variables_lists == {}: # init final dict
                 variables_lists['filename'] = []
                 variables_lists['timestamp'] = []
+                variables_lists['level'] = []
                 for action in actions:
                     variables_lists[action] = []
                 for variable in i.keys():
@@ -84,6 +85,7 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
                 run_completed = True
         variables_lists['filename'].append(file)
         variables_lists['timestamp'].append(timestamps[idx])
+        variables_lists['level'].append(level)
 
         for variable in run_variables.keys():
             variables_lists[variable].append(run_variables[variable])
