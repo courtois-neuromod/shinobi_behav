@@ -1,6 +1,5 @@
 import pandas as pd
 import os.path as op
-import matplotlib.pyplot as plt
 from src.params import figures_path, path_to_data
 from nilearn import plotting
 from nilearn import image
@@ -15,19 +14,17 @@ import pickle
 import nilearn
 from scipy import signal
 from scipy.stats import zscore
-
-
-
+from nilearn.glm.second_level import SecondLevelModel
 
 
  # Set constants
 sub = 'sub-01'
 actions = ['B', 'A', 'MODE', 'START', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'C', 'Y', 'X', 'Z']
 dpath = path_to_data + 'shinobi/'
-contrast = 'RightH'
+contrast = 'Hit'
 
 
-seslist= os.listdir(dpath + sub)
+#seslist= os.listdir(dpath + sub)
 cmaps = []
 # load nifti imgs
 for ses in ['ses-002','ses-003','ses-004','ses-005','ses-006','ses-007','ses-008']:#sorted(seslist):
@@ -39,8 +36,8 @@ second_level_input = cmaps
 second_design_matrix = pd.DataFrame([1] * len(second_level_input),
                              columns=['intercept'])
 
-from nilearn.glm.second_level import SecondLevelModel
-second_level_model = SecondLevelModel(smoothing_fwhm=8.0)
+
+second_level_model = SecondLevelModel(smoothing_fwhm=None)
 second_level_model = second_level_model.fit(second_level_input,
                                             design_matrix=second_design_matrix)
 
