@@ -28,11 +28,12 @@ def learning_curve(data_dict, time, variable,
 
 
     # Sigmoid fit
-    try:
-        p0 = [max(ydata), np.median(xdata),1,min(ydata)]
-        popt_sigm, pcov_sigm = curve_fit(sigmoid_curve, xdata, ydata, p0, method='dogbox')
-    except:
-        pass
+    if 'sigm' in curves:
+        try:
+            p0 = [max(ydata), np.median(xdata),1,min(ydata)]
+            popt_sigm, pcov_sigm = curve_fit(sigmoid_curve, xdata, ydata, p0, method='dogbox')
+        except:
+            pass
 
     # Distrib-based threshold
     if threshold != None:
@@ -61,11 +62,12 @@ def learning_curve(data_dict, time, variable,
         if variable == 'Completion speed' or variable == 'Relative speed':
             ax.invert_yaxis()
         ax.scatter(xdata, ydata, label='data')
-        try:
-            ax.plot(xdata, sigmoid_curve(xdata, *popt_sigm), 'y-',
-                label='sigmoid fit')
-        except:
-            pass
+        if 'sigm' in curves:
+            try:
+                ax.plot(xdata, sigmoid_curve(xdata, *popt_sigm), 'y-',
+                    label='sigmoid fit')
+            except:
+                pass
         if found_thresh:
             ax.axvline(x=xdata[idx_thresh], linestyle='--')
             ax.axhline(y=thresh, linestyle='--')
