@@ -53,6 +53,7 @@ for ses in ['ses-001', 'ses-002', 'ses-003', 'ses-004']:#sorted(seslist):
         conf=load_confounds.Params36()
         conf.load(confounds_fname)
         confounds_cnames.append(conf.columns_)
+        
         # load events
         with open(path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run), 'rb') as f:
             run_events = pickle.load(f)
