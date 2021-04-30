@@ -1,7 +1,19 @@
 hyruuk_shinobi_behav
 ==============================
 
-Behavioral analysis on shinobiIII data
+This project aims to perform several sanity checks on both the behavioural and
+neuroimaging data from the cneuromod.shinobi dataset.
+
+Installation steps :
+
+Sanity checks :
+- Deterministic behaviour of the emulator
+- Learning curves
+- In-scanner VS At-home performances
+- fMRI annotations generation based on behavioural logfiles
+- Session-level activation maps
+- Subject-level activation maps
+
 
 Project Organization
 ------------
