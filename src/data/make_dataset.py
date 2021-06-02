@@ -15,8 +15,11 @@ def main():
     for subj in subjects:
         for level in levels:
             print('Extracting game variables for {}_level-{}'.format(subj, level))
-            combine_variables(path_to_data, subj, level)
-
+            allvars = combine_variables(path_to_data, subj, level, save=False)
+            allvars = remove_fake_reps(allvars)
+            allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subject, level))
+            with open(allvars_path, 'wb') as f:
+                pickle.dump(allvars, f)
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
