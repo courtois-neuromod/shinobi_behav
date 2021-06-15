@@ -23,13 +23,16 @@ from src.params import subjects
  # Set constants
 dpath = path_to_data + 'shinobi/'
 contrasts = ['Jump', 'Hit', 'HealthLoss']
-if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
-    os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
+
 
 for sub in subjects:
     seslist= os.listdir(dpath + sub)
     for ses in sorted(seslist):
         for contrast in contrasts:
+            #create new folder for contrast
+            if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
+                os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
+            #check if file already exists
             if not os.path.isfile('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses)):
                 runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
                 fmri_imgs = []
