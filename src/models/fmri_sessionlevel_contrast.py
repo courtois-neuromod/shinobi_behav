@@ -41,7 +41,7 @@ for sub in subjects:
                     confounds = []
                     confounds_cnames = []
                     allruns_events = []
-                    print('Processing {}'.format(ses))
+                    print('Processing {} {} {}'.format(sub, ses, contrast))
                     for run in sorted(runs):
                         print('run : {}'.format(run))
                         data_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, sub, ses, run)
