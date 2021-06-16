@@ -29,77 +29,77 @@ for sub in subjects:
     seslist= os.listdir(dpath + sub)
     for ses in sorted(seslist):
         for contrast in contrasts:
-            #create new folder for contrast
-            if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
-                os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
-            #check if file already exists
-            if not os.path.isfile('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses)):
-                runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
-                fmri_imgs = []
-                design_matrices = []
-                confounds = []
-                confounds_cnames = []
-                allruns_events = []
-                print('Processing {}'.format(ses))
-                for run in sorted(runs):
-                    print('run : {}'.format(run))
-                    data_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, sub, ses, run)
-                    confounds_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_desc-confounds_timeseries.tsv'.format(sub, ses, sub, ses, run)
-                    anat_fname = '/project/rrg-pbellec/hyruuk/hyruuk_shinobi_behav/data/anat/derivatives/fmriprep-20.2lts/fmriprep/{}/anat/{}_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz'.format(sub, sub)
-                    fmri_img = image.concat_imgs(data_fname)
-                    masker = NiftiMasker()
-                    masker.fit(anat_fname)
-                    confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
-                    fmri_imgs.append(fmri_img)
-                    conf=load_confounds.Params36()
-                    conf.load(confounds_fname)
-                    confounds_cnames.append(conf.columns_)
+            try:
+                #create new folder for contrast
+                if not os.path.isdir(path_to_data + 'processed/cmaps/' + contrast):
+                    os.mkdir(path_to_data + 'processed/cmaps/' + contrast)
+                #check if file already exists
+                if not os.path.isfile('data/processed/cmaps/{}/{}_{}.nii.gz'.format(contrast, sub, ses)):
+                    runs = [filename[-13] for filename in os.listdir(dpath + '{}/{}/func'.format(sub, ses)) if 'bold.nii.gz' in filename]
+                    fmri_imgs = []
+                    design_matrices = []
+                    confounds = []
+                    confounds_cnames = []
+                    allruns_events = []
+                    print('Processing {}'.format(ses))
+                    for run in sorted(runs):
+                        print('run : {}'.format(run))
+                        data_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz'.format(sub, ses, sub, ses, run)
+                        confounds_fname = dpath + 'derivatives/fmriprep-20.2lts/fmriprep/{}/{}/func/{}_{}_task-shinobi_run-{}_desc-confounds_timeseries.tsv'.format(sub, ses, sub, ses, run)
+                        anat_fname = '/project/rrg-pbellec/hyruuk/hyruuk_shinobi_behav/data/anat/derivatives/fmriprep-20.2lts/fmriprep/{}/anat/{}_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz'.format(sub, sub)
+                        fmri_img = image.concat_imgs(data_fname)
+                        masker = NiftiMasker()
+                        masker.fit(anat_fname)
+                        confounds.append(pd.DataFrame.from_records(load_confounds.Params36().load(confounds_fname)))
+                        fmri_imgs.append(fmri_img)
+                        conf=load_confounds.Params36()
+                        conf.load(confounds_fname)
+                        confounds_cnames.append(conf.columns_)
 
-                    # load events
-                    with open(path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run), 'rb') as f:
-                        run_events = pickle.load(f)
-                    if 'Left' in contrast or 'Right' in contrast:
-                        trimmed_df = trim_events_df(run_events, trim_by='LvR')
-                    elif 'Jump' in contrast or 'Hit' in contrast:
-                        trimmed_df = trim_events_df(run_events, trim_by='JvH')
-                    else:
-                        trimmed_df = trim_events_df(run_events, trim_by='healthloss')
-                    allruns_events.append(trimmed_df)
+                        # load events
+                        with open(path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run), 'rb') as f:
+                            run_events = pickle.load(f)
+                        if 'Left' in contrast or 'Right' in contrast:
+                            trimmed_df = trim_events_df(run_events, trim_by='LvR')
+                        elif 'Jump' in contrast or 'Hit' in contrast:
+                            trimmed_df = trim_events_df(run_events, trim_by='JvH')
+                        else:
+                            trimmed_df = trim_events_df(run_events, trim_by='healthloss')
+                        allruns_events.append(trimmed_df)
 
-                # create design matrices
-                for idx, run in enumerate(sorted(runs)):
-                    t_r = 1.49
-                    n_slices = confounds[idx].shape[0]
-                    frame_times = np.arange(n_slices) * t_r
+                    # create design matrices
+                    for idx, run in enumerate(sorted(runs)):
+                        t_r = 1.49
+                        n_slices = confounds[idx].shape[0]
+                        frame_times = np.arange(n_slices) * t_r
 
-                    design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
-                                                                                           events=allruns_events[idx],
-                                                                                          drift_model=None,
-                                                                                          add_regs=confounds[idx],
-                                                                                      add_reg_names=confounds_cnames[idx])
-                    b, a = signal.butter(3, 0.01, btype='high')
+                        design_matrix = nilearn.glm.first_level.make_first_level_design_matrix(frame_times,
+                                                                                               events=allruns_events[idx],
+                                                                                              drift_model=None,
+                                                                                              add_regs=confounds[idx],
+                                                                                          add_reg_names=confounds_cnames[idx])
+                        b, a = signal.butter(3, 0.01, btype='high')
 
-                    if 'Left' in contrast or 'Right' in contrast:
-                        LeftH_ts = np.asarray(design_matrix['LeftH'])
-                        RightH_ts = np.asarray(design_matrix['RightH'])
-                        LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
-                        RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
-                        LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
-                        RightH_ts_hpf_z = zscore(RightH_ts_hpf)
-                        design_matrix['LeftH'] = LeftH_ts_hpf_z
-                        design_matrix['RightH'] = RightH_ts_hpf_z
+                        if 'Left' in contrast or 'Right' in contrast:
+                            LeftH_ts = np.asarray(design_matrix['LeftH'])
+                            RightH_ts = np.asarray(design_matrix['RightH'])
+                            LeftH_ts_hpf = signal.filtfilt(b, a, LeftH_ts)
+                            RightH_ts_hpf = signal.filtfilt(b, a, RightH_ts)
+                            LeftH_ts_hpf_z = zscore(LeftH_ts_hpf)
+                            RightH_ts_hpf_z = zscore(RightH_ts_hpf)
+                            design_matrix['LeftH'] = LeftH_ts_hpf_z
+                            design_matrix['RightH'] = RightH_ts_hpf_z
 
-                    if 'Jump' in contrast or 'Hit' in contrast:
-                        design_matrix['Jump'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Jump'])))
-                        design_matrix['Hit'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Hit'])))
-
-
-                    design_matrices.append(design_matrix)
+                        if 'Jump' in contrast or 'Hit' in contrast:
+                            design_matrix['Jump'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Jump'])))
+                            design_matrix['Hit'] = zscore(signal.filtfilt(b, a, np.asarray(design_matrix['Hit'])))
 
 
+                        design_matrices.append(design_matrix)
 
-                # build model
-                try:
+
+
+                    # build model
                     print('Fitting a GLM')
                     fmri_glm = FirstLevelModel(t_r=1.49,
                                                noise_model='ar1',
@@ -135,4 +135,4 @@ for sub in subjects:
                     # save also uncorrected map
                     view = plotting.view_img(uncorr_map, threshold=3, title='{} (p<0.001), uncorr'.format(contrast))
                     view.save_as_html(figures_path + '/{}_{}_{}_flm_uncorr_fwhm5.html'.format(sub, ses, contrast))
-                except Exception as e: print(e)
+            except Exception as e: print(e)
