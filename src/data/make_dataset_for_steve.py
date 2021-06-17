@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from src.params import *
-from data import combine_variables
+from data import combine_variables, remove_fake_reps
 
 
 def main():
