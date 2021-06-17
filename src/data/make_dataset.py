@@ -37,13 +37,15 @@ def main():
                 allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subj, level))
             elif args.nuc:
                 print('Extracting game variables (NUC) for {}_level-{}'.format(subj, level))
-                allvars = combine_variables(path_to_data, subj, level, behav=False, save=False)
+                allvars = combine_variables(path_to_data, subj, level, behav=True, save=False)
                 allvars = remove_fake_reps(allvars)
-                allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subj, level))
+                allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_nuc.pkl'.format(subj, level))
             else:
                 print('Aborted.')
                 print('Please chose between --nuc and --scan arguments.')
                 quit()
+            if not op.isdir(op.join(path_to_data, 'processed')):
+                os.mkdir(op.join(path_to_data, 'processed'))
             with open(allvars_path, 'wb') as f:
                 pickle.dump(allvars, f)
 
