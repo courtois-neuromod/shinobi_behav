@@ -108,56 +108,61 @@ def retrieve_scanvariables(files):
     variables_lists = {}
 
     for file in files:
-        level = file[-11:-8]
-        timestamp = file[-73:-65]
-        #print(file)
-        if level == '5-0':
-            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
-        else:
-            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
-        actions = env.buttons
+        try:
+            level = file[-11:-8]
+            timestamp = file[-73:-65]
+            if level == '5-0':
+                env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
+            else:
+                env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
+            actions = env.buttons
 
-        run_variables = {}
-        key_log = retro.Movie(file)
-        env.reset()
-        run_completed = False
-        while key_log.step():
-            a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
-            _,_,done,i = env.step(a)
+            run_variables = {}
+            key_log = retro.Movie(file)
+            env.reset()
+            run_completed = False
+            while key_log.step():
+                a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
+                _,_,done,i = env.step(a)
 
-            if variables_lists == {}: # init final dict
-                variables_lists['filename'] = []
-                variables_lists['timestamp'] = []
-                variables_lists['level'] = []
-                for action in actions:
-                    variables_lists[action] = []
-                for variable in i.keys():
-                    variables_lists[variable] = []
+                if variables_lists == {}: # init final dict
+                    variables_lists['filename'] = []
+                    variables_lists['timestamp'] = []
+                    variables_lists['level'] = []
+                    for action in actions:
+                        variables_lists[action] = []
+                    for variable in i.keys():
+                        variables_lists[variable] = []
 
-            if run_variables == {}: # init temp dict
-                for variable in i.keys():
-                    run_variables[variable] = []
-                for action in actions:
-                    run_variables[action] = []
+                if run_variables == {}: # init temp dict
+                    for variable in i.keys():
+                        run_variables[variable] = []
+                    for action in actions:
+                        run_variables[action] = []
 
-            for variable in i.keys(): # fill up temp dict
-                run_variables[variable].append(i[variable])
-            for idx_a, action in enumerate(actions):
-                run_variables[action].append(a[idx_a])
+                for variable in i.keys(): # fill up temp dict
+                    run_variables[variable].append(i[variable])
+                for idx_a, action in enumerate(actions):
+                    run_variables[action].append(a[idx_a])
 
-            if done == True:
-                run_completed = True
-        variables_lists['filename'].append(file)
-        variables_lists['timestamp'].append(timestamp)
-        variables_lists['level'].append(level)
+                if done == True:
+                    run_completed = True
+            variables_lists['filename'].append(file)
+            variables_lists['timestamp'].append(timestamp)
+            variables_lists['level'].append(level)
 
-        for variable in run_variables.keys():
-            variables_lists[variable].append(run_variables[variable])
-        env.close()
+            for variable in run_variables.keys():
+                variables_lists[variable].append(run_variables[variable])
+            env.close()
+        except Exception as e:
+            env.close()
+            print(e)
+            print(file)
+            print('-------------------------')
     return variables_lists
 
 
-def combine_variables(path_to_data, subject, level, behav=True, save=True):
+def combine_variables(path_to_data, subject, level, behav=False, save=True):
     '''
     Load the raw allvars dict, create it if doesn't exists already.
 
@@ -166,6 +171,7 @@ def combine_variables(path_to_data, subject, level, behav=True, save=True):
     subject = string, subject name
     level = string, level, can be '1','4','5' or '1-0', '4-1', '5-0'
     save = boolean, save the output in a file
+    behav = boolean, if True will create datadict for NUC (behaviour only) files instead of scan-related
 
     Outputs :
     allvars = dict, keys are raw variables. Each entry contains a list of len() = n_repetitions_total, in which each element is a list of len() = n_frames
@@ -206,7 +212,7 @@ def combine_variables(path_to_data, subject, level, behav=True, save=True):
 
         # retrieve variables for the selected files
         if not(op.isfile(allvars_path)):
-            allvars = retrieve_variables(files, level, bids=False, by_timestamps=False)
+            allvars = retrieve_scanvariables(files)#, level, bids=False, by_timestamps=False)
             if save == True:
                 with open(allvars_path, 'wb') as f:
                     pickle.dump(allvars, f)

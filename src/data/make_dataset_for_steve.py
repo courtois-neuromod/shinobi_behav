@@ -2,7 +2,7 @@
 import logging
 from src.params import *
 from data import combine_variables, remove_fake_reps
-
+import os.path as op
 
 def main():
     """ Runs data processing scripts to turn raw data from (../bids) into
@@ -17,7 +17,7 @@ def main():
             print('Extracting game variables for {}_level-{}'.format(subj, level))
             allvars = combine_variables(path_to_data, subj, level, behav=False, save=False)
             allvars = remove_fake_reps(allvars)
-            allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subject, level))
+            allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subj, level))
             with open(allvars_path, 'wb') as f:
                 pickle.dump(allvars, f)
 
