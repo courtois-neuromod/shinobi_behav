@@ -4,6 +4,7 @@ from src.params import *
 from data import combine_variables, remove_fake_reps
 import os.path as op
 import argparse
+import pickle
 
 def main():
     """ Runs data processing scripts to turn raw data from (../bids) into
