@@ -21,8 +21,8 @@ def main():
             allvars_behav = combine_variables(path_to_data, subj, level, behav=True, save=False)
             allvars_behav = remove_fake_reps(allvars_behav)
             allvars_behav_path = op.join(path_to_data, 'processed','{}_{}_allvars_behav.pkl'.format(subj, level))
-            with open(allvars_scan_path, 'wb') as f:
-                pickle.dump(allvars_scan, f)
+            with open(allvars_behav_path, 'wb') as f:
+                pickle.dump(allvars_behav, f)
             logger.info('Scan sessions')
             allvars_scan = combine_variables(path_to_data, subj, level, behav=False, save=False)
             allvars_scan = remove_fake_reps(allvars_scan)
