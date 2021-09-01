@@ -9,17 +9,25 @@ def main():
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info('Processing datasets for learning visualization.')
 
     # start loop
     for subj in subjects:
         for level in levels:
             print('Extracting game variables for {}_level-{}'.format(subj, level))
-            allvars = combine_variables(path_to_data, subj, level, save=False)
-            allvars = remove_fake_reps(allvars)
-            allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subject, level))
-            with open(allvars_path, 'wb') as f:
-                pickle.dump(allvars, f)
+            print('Training sessions (NUC)')
+            allvars_behav = combine_variables(path_to_data, subj, level, behav=True, save=False)
+            allvars_behav = remove_fake_reps(allvars_behav)
+            allvars_behav_path = op.join(path_to_data, 'processed','{}_{}_allvars_behav.pkl'.format(subject, level))
+            with open(allvars_scan_path, 'wb') as f:
+                pickle.dump(allvars_scan, f)
+            print('Scan sessions')
+            allvars_scan = combine_variables(path_to_data, subj, level, behav=False, save=False)
+            allvars_scan = remove_fake_reps(allvars_behav)
+            allvars_scan_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subject, level))
+            with open(allvars_scan_path, 'wb') as f:
+                pickle.dump(allvars_scan, f)
+            print('Done.')
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
