@@ -2,7 +2,7 @@
 import logging
 from src.params import *
 from data import combine_variables, remove_fake_reps
-import op
+import os.path as op
 import pickle
 
 
