@@ -12,7 +12,11 @@ def main():
     """
     logger = logging.getLogger(__name__)
     logger.info('Processing datasets for at-home VS in-scanner visualization.')
-
+    if not op.isdir(op.join(path_to_data, 'processed')):
+        os.mkdir(op.join(path_to_data, 'processed'))
+        logger.info('Directory created')
+    else:
+        logger.info('Directory already exists')
     # start loop
     for subj in subjects:
         for level in levels:
