@@ -1,8 +1,9 @@
 hyruuk_shinobi_behav
 ==============================
 
-This project aims to perform several sanity checks on both the behavioural and
-neuroimaging data from the cneuromod.shinobi dataset.
+This project aims to perform several sanity checks on the cneuromod.shinobi dataset,
+and generate game-based events annotations in Nilearn-compatible format.
+fMRI analysis (session- and subject-level activation maps) can be found in [this repo](https://github.com/courtois-neuromod/hyruuk_shinobi_fmri).
 
 Installation steps :
 
@@ -10,9 +11,9 @@ Sanity checks :
 - Deterministic behaviour of the emulator
 - Learning curves
 - In-scanner VS At-home performances
+
+Annotations :
 - fMRI annotations generation based on behavioural logfiles
-- Session-level activation maps
-- Subject-level activation maps
 
 
 Project Organization
