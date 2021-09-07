@@ -1,4 +1,4 @@
-hyruuk_shinobi_behav
+shinobi_behav
 ==============================
 
 This project aims to perform several sanity checks on the cneuromod.shinobi dataset,
