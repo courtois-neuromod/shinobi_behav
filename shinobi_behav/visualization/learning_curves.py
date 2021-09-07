@@ -1,6 +1,6 @@
 import logging
-from src.params import *
-from src.features.features import load_features_dict
+import shinobi_behav
+from shinobi_behav.features.features import load_features_dict
 import click
 from visualization import learning_curve, fetch_usable_reps
 import matplotlib.pyplot as plt
@@ -13,6 +13,7 @@ def main():
     These features are then used to plot the learning curves with src/visualization/generate_lcurves.py.
     src.features.build_features.py must be ran before using generate_lcurves
     """
+    path_to_data = shinobi_behav.path_to_data
     logger = logging.getLogger(__name__)
     logger.info('create repetition-wise features')
     usable_filenames_all = {}

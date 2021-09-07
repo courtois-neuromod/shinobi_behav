@@ -1,6 +1,6 @@
 import os
 import os.path as op
-from src.params import path_to_data
+import shinobi_behav
 import retro
 import numpy as np
 
@@ -8,6 +8,7 @@ subject = 'sub-01'
 
 sess = 'ses-shinobi_004'
 
+path_to_data = shinobi_behav.path_to_data
 file = os.listdir(op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess))[0]
 filepath = op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess, file)
 

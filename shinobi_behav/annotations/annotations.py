@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from src.features.features import filter_run, compute_framewise_aps
+from shinobi_behav.features.features import filter_run, compute_framewise_aps
 import matplotlib
 
 

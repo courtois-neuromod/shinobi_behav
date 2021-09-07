@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-from src.params import *
-from data import combine_variables, remove_fake_reps
+import shinobi_behav
+from shinobi_behav.data.data import combine_variables, remove_fake_reps
 import os.path as op
 import pickle
 import os
@@ -11,6 +11,7 @@ def main():
     """ Runs data processing scripts to turn raw data from (../bids) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
+    path_to_data = shinobi_behav.path_to_data
     logger = logging.getLogger(__name__)
     logger.info('Processing datasets for at-home VS in-scanner visualization.')
     if not op.isdir(op.join(path_to_data, 'processed')):
@@ -19,8 +20,8 @@ def main():
     else:
         logger.info('Directory already exists')
     # start loop
-    for subj in subjects:
-        for level in levels:
+    for subj in shinobi_behav.subjects:
+        for level in shinobi_behav.levels:
             logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
             logger.info('Training sessions (NUC)')
             allvars_behav = combine_variables(path_to_data, subj, level, behav=True, save=False)

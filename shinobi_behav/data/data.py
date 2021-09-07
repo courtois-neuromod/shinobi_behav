@@ -4,7 +4,7 @@ import os.path as op
 import pickle
 import os
 import json
-from src.features.features import aggregate_vars, compute_max_score
+from shinobi_behav.features.features import aggregate_vars, compute_max_score
 from tqdm import tqdm
 
 def retrieve_variables(files, level, bids=True, by_timestamps=True):
