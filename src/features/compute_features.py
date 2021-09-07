@@ -7,16 +7,16 @@ import click
 
 
 def main():
-    """ Create repetition-wise features based on the processed data from (../processed)
+    """ Create averaged features based on the datadicts in ./data/processed/
     These features are then used to plot the learning curves with src/visualization/generate_lcurves.py
     """
     logger = logging.getLogger(__name__)
-    logger.info('create repetition-wise features')
+    logger.info('Create repetition-wise features')
 
     # start loop
     for subj in subjects:
         for level in levels:
-            print('Extracting game variables for {}_level-{}'.format(subj, level))
+            logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
             allvars = combine_variables(path_to_data, subj, level)
             allvars = remove_fake_reps(allvars)
             load_features_dict(path_to_data, subj, level, save=True, metric='mean', allvars=allvars)

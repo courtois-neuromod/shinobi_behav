@@ -5,6 +5,7 @@ import pickle
 import os
 import json
 from src.features.features import aggregate_vars, compute_max_score
+from tqdm import tqdm
 
 def retrieve_variables(files, level, bids=True, by_timestamps=True):
     '''
@@ -26,8 +27,8 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
     if level == '5':
         level = '5-0'
 
-    if level == '5-0':
-        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
+    if level == '1-0':
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
     else:
         env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
     actions = env.buttons
@@ -50,7 +51,7 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
     else:
         sorted_idx = range(len(timestamps))
 
-    for idx in sorted_idx:
+    for idx in tqdm(sorted_idx, desc='Processing NUC files...'):
         file = files[idx]
         #print(file)
         run_variables = {}
@@ -107,12 +108,12 @@ def retrieve_scanvariables(files):
 
     variables_lists = {}
 
-    for file in files:
+    for file in tqdm(files, desc='Processing scan files...'):
         level = file[-11:-8]
         timestamp = file[-73:-65]
         #print(file)
-        if level == '5-0':
-            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
+        if level == '1-0':
+            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
         else:
             env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
         actions = env.buttons
@@ -159,7 +160,7 @@ def retrieve_scanvariables(files):
 
 def combine_variables(path_to_data, subject, level, behav=True, save=True):
     '''
-    Load the raw allvars dict, create it if doesn't exists already.
+    Load the raw data dict, create it if doesn't exists already.
 
     Inputs :
     path_to_data = string, path to the main BIDS folder
@@ -173,14 +174,14 @@ def combine_variables(path_to_data, subject, level, behav=True, save=True):
 
     if behav:
         # select appropriate files
-        sessions = os.listdir(op.join(path_to_data, 'bidsbehav', subject))
+        sessions = os.listdir(op.join(path_to_data, 'shinobi_beh', subject))
         files = []
         for sess in sessions:
-            allfiles = os.listdir(op.join(path_to_data, 'bidsbehav', subject, sess, 'beh'))
+            allfiles = os.listdir(op.join(path_to_data, 'shinobi_beh', subject, sess, 'beh'))
             for file in allfiles:
                 if 'level-{}'.format(level) in file:
                     if 'bk2' in file:
-                        files.append(op.join(path_to_data, 'bidsbehav', subject, sess, 'beh', file))
+                        files.append(op.join(path_to_data, 'shinobi_beh', subject, sess, 'beh', file))
         allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_behav.pkl'.format(subject, level))
 
         # retrieve variables for the selected files

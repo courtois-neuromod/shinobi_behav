@@ -123,7 +123,7 @@ def compute_completed(allvars):
 
     Inputs :
     allvars = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = frames
+    level1 lists = reps and level2 listprints = frames
 
     Outputs :
     completed = list with one element per repetition (0 for repetition failed, 1 for repetition completed)
