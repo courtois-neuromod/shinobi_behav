@@ -1,3 +1,0 @@
-[submodule "data/shinobi"]
-	path = data/shinobi
-	url = git@github.com:courtois-neuromod/shinobi.git
