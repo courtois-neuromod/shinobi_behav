@@ -1,6 +1,6 @@
-from src.params import actions, path_to_data, subjects
-from src.data.data import retrieve_scanvariables
-from src.annotations.annotations import create_runevents
+from shinobi_behav.params import actions, path_to_data, subjects
+from shinobi_behav.data.data import retrieve_scanvariables
+from shinobi_behav.annotations.annotations import create_runevents
 import pickle
 import os
 import logging
