@@ -19,3 +19,4 @@ bids
 load_confounds
 seaborn
 statsmodels
+tqdm
