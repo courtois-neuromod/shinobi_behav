@@ -109,52 +109,55 @@ def retrieve_scanvariables(files):
     variables_lists = {}
 
     for file in tqdm(files, desc='Processing scan files...'):
-        level = file[-11:-8]
-        timestamp = file[-73:-65]
-        #print(file)
-        if level == '1-0':
-            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
-        else:
-            env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
-        actions = env.buttons
+        try:
+            level = file[-11:-8]
+            timestamp = file[-73:-65]
 
-        run_variables = {}
-        key_log = retro.Movie(file)
-        env.reset()
-        run_completed = False
-        while key_log.step():
-            a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
-            _,_,done,i = env.step(a)
+            if level == '1-0':
+                env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
+            else:
+                env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
+            actions = env.buttons
 
-            if variables_lists == {}: # init final dict
-                variables_lists['filename'] = []
-                variables_lists['timestamp'] = []
-                variables_lists['level'] = []
-                for action in actions:
-                    variables_lists[action] = []
-                for variable in i.keys():
-                    variables_lists[variable] = []
+            run_variables = {}
+            key_log = retro.Movie(file)
+            env.reset()
+            run_completed = False
+            while key_log.step():
+                a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
+                _,_,done,i = env.step(a)
 
-            if run_variables == {}: # init temp dict
-                for variable in i.keys():
-                    run_variables[variable] = []
-                for action in actions:
-                    run_variables[action] = []
+                if variables_lists == {}: # init final dict
+                    variables_lists['filename'] = []
+                    variables_lists['timestamp'] = []
+                    variables_lists['level'] = []
+                    for action in actions:
+                        variables_lists[action] = []
+                    for variable in i.keys():
+                        variables_lists[variable] = []
 
-            for variable in i.keys(): # fill up temp dict
-                run_variables[variable].append(i[variable])
-            for idx_a, action in enumerate(actions):
-                run_variables[action].append(a[idx_a])
+                if run_variables == {}: # init temp dict
+                    for variable in i.keys():
+                        run_variables[variable] = []
+                    for action in actions:
+                        run_variables[action] = []
 
-            if done == True:
-                run_completed = True
-        variables_lists['filename'].append(file)
-        variables_lists['timestamp'].append(timestamp)
-        variables_lists['level'].append(level)
+                for variable in i.keys(): # fill up temp dict
+                    run_variables[variable].append(i[variable])
+                for idx_a, action in enumerate(actions):
+                    run_variables[action].append(a[idx_a])
 
-        for variable in run_variables.keys():
-            variables_lists[variable].append(run_variables[variable])
-        env.close()
+                if done == True:
+                    run_completed = True
+            variables_lists['filename'].append(file)
+            variables_lists['timestamp'].append(timestamp)
+            variables_lists['level'].append(level)
+
+            for variable in run_variables.keys():
+                variables_lists[variable].append(run_variables[variable])
+            env.close()
+        except:
+            print('Missing bk2 file')
     return variables_lists
 
 
