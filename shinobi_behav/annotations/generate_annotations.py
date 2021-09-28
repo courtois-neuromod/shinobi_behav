@@ -16,6 +16,7 @@ def main():
                 events_fname = path_to_data + 'shinobi/{}/{}/func/{}_{}_task-shinobi_run-0{}_events.tsv'.format(sub, ses, sub, ses, run)
                 startevents = pd.read_table(events_fname)
                 files = startevents['stim_file'].values.tolist()
+                print(files)
                 files = [path_to_data + 'shinobi/' + str(file) for file in files]
                 # Retrieve variables from these files
                 runvars = retrieve_scanvariables(files)
