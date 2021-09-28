@@ -8,4 +8,4 @@
 
 module load python/3.8.0
 
-/lustre03/project/6003287/hyruuk/.virtualenvs/hyruuk_shinobi_behav/bin/python /project/rrg-pbellec/hyruuk/shinobi_fmri/data/shinobi_behav/shinobi_behav/annotations/generate_annotations.py
+/home/hyruuk/python_envs/shinobi_env/bin/python /project/rrg-pbellec/hyruuk/shinobi_fmri/data/shinobi_behav/shinobi_behav/annotations/generate_annotations.py
