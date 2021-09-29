@@ -26,7 +26,8 @@ def main():
                         os.mkdir(path_to_data + 'processed/annotations')
                     with open(events_path, 'wb') as f:
                         pickle.dump(events_df, f)
-                except:
+                except Exception as e:
+                    print(e)
                     print('File not created for {} {} run-{}'.format(sub, ses, run))
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

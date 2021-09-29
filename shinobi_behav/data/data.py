@@ -156,7 +156,8 @@ def retrieve_scanvariables(files):
             for variable in run_variables.keys():
                 variables_lists[variable].append(run_variables[variable])
             env.close()
-        except:
+        except Exception as e:
+            print(e)
             print('Missing bk2 file')
     return variables_lists
 
