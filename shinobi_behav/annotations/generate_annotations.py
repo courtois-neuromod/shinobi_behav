@@ -19,16 +19,14 @@ def main():
                 files = [path_to_data + 'shinobi/' + str(file) for file in files]
                 # Retrieve variables from these files
                 runvars = retrieve_scanvariables(files)
-                try:
-                    events_df = create_runevents(runvars, startevents, actions=actions)
-                    events_path = path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run)
-                    if not os.path.isdir(path_to_data + 'processed/annotations'):
-                        os.mkdir(path_to_data + 'processed/annotations')
-                    with open(events_path, 'wb') as f:
-                        pickle.dump(events_df, f)
-                except Exception as e:
-                    print(e)
-                    print('File not created for {} {} run-{}'.format(sub, ses, run))
+                print(runvars)
+                events_df = create_runevents(runvars, startevents, actions=actions)
+                events_path = path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run)
+                if not os.path.isdir(path_to_data + 'processed/annotations'):
+                    os.makedirs(path_to_data + 'processed/annotations')
+                with open(events_path, 'wb') as f:
+                    pickle.dump(events_df, f)
+
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)

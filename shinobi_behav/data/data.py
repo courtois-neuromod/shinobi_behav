@@ -94,7 +94,53 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
     allvars = variables_lists
     return allvars
 
+def extract_variables(file, setup='scan'):
+    """Gets and prints the spreadsheet's header columns
 
+    Parameters
+    ----------
+    file : str
+        The path to the .bk2 file location
+    setup : str, optional
+        Can be 'scan', for files acquired during scanning sessions
+        or 'home', for files acquired at home during the training sessions.
+
+    Returns
+    -------
+    repvars
+        a dict containing all the variables extracted from the log file
+    """
+    level = file[-11:-8]
+    date = file[-73:-65]
+
+    if level == '1-0':
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
+    else:
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
+    actions = env.buttons
+
+    repvars = {}
+    repvars['filename'] = file
+    repvars['level'] = level
+    repvars['date'] = date
+
+    key_log = retro.Movie(file)
+    env.reset()
+
+    while key_log.step():
+        a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
+        _,_,done,i = env.step(a)
+
+        for variable in i.keys(): # fill up dict
+            if variable not in repvars: # init entry first
+                repvars[variable] = []
+            repvars[variable].append(i[variable])
+        for idx_a, action in enumerate(actions):
+            if action not in repvars:
+                repvars[action] = []
+            repvars[action].append(a[idx_a])
+    env.close()
+    return repvars
 
 def retrieve_scanvariables(files):
     # This is a modified version of src.data.data.retrieve_variables, adapted to the naming of scan-related behavioural files

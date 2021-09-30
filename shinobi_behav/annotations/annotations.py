@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -98,49 +99,56 @@ def generate_healthloss_events(health, FS=60, dur=0.1):
     return events_df
 
 def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=True, get_actions=True, get_healthloss=True, get_startend=True):
-
     onset_reps = startevents['onset'].values.tolist()
     dur_reps = startevents['duration'].values.tolist()
-    lvl_reps = [x[-11] for x in startevents['stim_file'].values.tolist()]
 
     if get_aps:
-        framewise_aps = compute_framewise_aps(runvars, actions=actions, FS=FS)
+        try:
+            framewise_aps = compute_framewise_aps(runvars, actions=actions, FS=FS)
+        except Exception as e:
+            print(e)
 
     # init df list
     all_df = []
 
     for idx, onset_rep in enumerate(onset_reps):
-        #print('Extracting events for {}'.format(runvars['filename'][idx]))
-        if get_actions:
-            # get the different possible actions
-            # generate events for each of them
-            for act in actions:
-                var = runvars[act][idx]
-                temp_df = generate_key_events(var, act, FS=FS)
+        if isinstance(startevents['stim_file'][idx], str):
+            lvl_rep =  startevents['stim_file'][idx][-11]
+
+            #print('Extracting events for {}'.format(runvars['filename'][idx]))
+            if get_actions:
+                # get the different possible actions
+                # generate events for each of them
+                for act in actions:
+                    var = runvars[act][idx]
+                    temp_df = generate_key_events(var, act, FS=FS)
+                    temp_df['onset'] = temp_df['onset'] + onset_rep
+                    temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
+                    all_df.append(temp_df)
+            if get_aps:
+                temp_df = generate_aps_events(framewise_aps, FS=FS)
                 temp_df['onset'] = temp_df['onset'] + onset_rep
-                temp_df['trial_type'] = lvl_reps[idx] + '_' + temp_df['trial_type']
+                temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
                 all_df.append(temp_df)
-        if get_aps:
-            temp_df = generate_aps_events(framewise_aps[idx], FS=FS)
-            temp_df['onset'] = temp_df['onset'] + onset_rep
-            temp_df['trial_type'] = lvl_reps[idx] + '_' + temp_df['trial_type']
-            all_df.append(temp_df)
-        if get_healthloss:
-            temp_df = generate_healthloss_events(runvars['health'][idx], FS=FS, dur=0.1)
-            temp_df['onset'] = temp_df['onset'] + onset_rep
-            temp_df['trial_type'] = lvl_reps[idx] + '_' + temp_df['trial_type']
-            all_df.append(temp_df)
+            if get_healthloss:
+                temp_df = generate_healthloss_events(runvars['health'][idx], FS=FS, dur=0.1)
+                temp_df['onset'] = temp_df['onset'] + onset_rep
+                temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
+                all_df.append(temp_df)
 
-    if get_startend:
-        temp_df = startevents.drop('stim_file', axis=1)
-        temp_df['trial_type'] = ['level_{}'.format(x) for x in lvl_reps]
-        all_df.append(temp_df)
-        #todo : if get_endstart
-        #todo : if get_kills
-        #todo : if get_healthloss
+        if all_df != []:
+            if get_startend:
+                temp_df = startevents.drop('stim_file', axis=1)
+                temp_df['trial_type'] = 'level_{}'.format(lvl_rep)
+                all_df.append(temp_df)
+                #todo : if get_endstart
+                #todo : if get_kills
+                #todo : if get_healthloss
 
-    events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
-    return events_df
+            events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
+        else:
+            events_df = pd.DataFrame()
+        return events_df
 
 
 def trim_events_df(events_df, trim_by='LvR'):
