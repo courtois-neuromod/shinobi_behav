@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from shinobi_behav.features.features import filter_run, compute_framewise_aps
 import matplotlib
+import matplotlib.collections as mc
 
 
 def generate_key_events(var, key, FS=60):
@@ -121,67 +122,70 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
     # init df list
     all_df = []
     for idx, repvars in enumerate(runvars):
-
-        print('Extracting events for {}'.format(repvars['filename']))
         if get_actions:
             for act in actions:
                 var = repvars[act]
                 temp_df = generate_key_events(var, act, FS=FS)
-                temp_df['onset'] = temp_df['onset'] + repvars['onset']
+                temp_df['onset'] = temp_df['onset'] + repvars['rep_onset']
                 temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
                 all_df.append(temp_df)
 
         if get_aps:
             framewise_aps = compute_framewise_aps(repvars, actions=actions, FS=FS)
             temp_df = generate_aps_events(framewise_aps, FS=FS)
-            temp_df['onset'] = temp_df['onset'] + repvars['onset']
+            temp_df['onset'] = temp_df['onset'] + repvars['rep_onset']
             temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
             all_df.append(temp_df)
 
         if get_healthloss:
             temp_df = generate_healthloss_events(repvars['health'], FS=FS, dur=0.1)
-            temp_df['onset'] = temp_df['onset'] + repvars['onset']
+            temp_df['onset'] = temp_df['onset'] + repvars['rep_onset']
             temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
             all_df.append(temp_df)
 
         if get_startend:
-            temp_df = startevents.drop('stim_file', axis=1)
-            temp_df['trial_type'] = 'level_{}'.format(repvars['level'])
+            temp_df = pd.DataFrame([
+                                     [repvars['rep_duration'],
+                                     repvars['rep_onset'],
+                                     'level_{}'.format(repvars['level'])]],
+                                     columns=['duration', 'onset', 'trial_type'])
             all_df.append(temp_df)
 
         #todo : if get_endstart -- what did I mean by that ?
         #todo : if get_kills
-
+    try:
         events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
-
-        return events_df
+    except ValueError:
+        print('No bk2 files available for this run. Returning empty df.')
+        events_df = pd.DataFrame()
+    return events_df
 
 
 def trim_events_df(events_df, trim_by='LvR'):
     if trim_by=='LvR':
         # Create Left df
-        lh_df = pd.concat([events_df[events_df['trial_type'] == '1_LEFT'],
-                           events_df[events_df['trial_type'] == '1_RIGHT'],
-                           events_df[events_df['trial_type'] == '1_DOWN'],
-                           events_df[events_df['trial_type'] == '1_UP'],
-                           events_df[events_df['trial_type'] == '4_LEFT'],
-                           events_df[events_df['trial_type'] == '4_RIGHT'],
-                           events_df[events_df['trial_type'] == '4_DOWN'],
-                           events_df[events_df['trial_type'] == '4_UP'],
-                            events_df[events_df['trial_type'] == '5_LEFT'],
-                           events_df[events_df['trial_type'] == '5_RIGHT'],
-                           events_df[events_df['trial_type'] == '5_DOWN'],
-                           events_df[events_df['trial_type'] == '5_UP']
+        lh_df = pd.concat([events_df[events_df['trial_type'] == '1-0_LEFT'],
+                           events_df[events_df['trial_type'] == '1-0_RIGHT'],
+                           events_df[events_df['trial_type'] == '1-0_DOWN'],
+                           events_df[events_df['trial_type'] == '1-0_UP'],
+                           events_df[events_df['trial_type'] == '4-1_LEFT'],
+                           events_df[events_df['trial_type'] == '4-1_RIGHT'],
+                           events_df[events_df['trial_type'] == '4-1_DOWN'],
+                           events_df[events_df['trial_type'] == '4-1_UP'],
+                            events_df[events_df['trial_type'] == '5-0_LEFT'],
+                           events_df[events_df['trial_type'] == '5-0_RIGHT'],
+                           events_df[events_df['trial_type'] == '5-0_DOWN'],
+                           events_df[events_df['trial_type'] == '5-0_UP']
                           ]).sort_values(by='onset').reset_index(drop=True)
         lh_df['trial_type'] = 'LeftH'
 
         # Create Right df
-        rh_df = pd.concat([events_df[events_df['trial_type'] == '1_B'],
-                           events_df[events_df['trial_type'] == '1_C'],
-                           events_df[events_df['trial_type'] == '4_B'],
-                           events_df[events_df['trial_type'] == '4_C'],
-                            events_df[events_df['trial_type'] == '5_B'],
-                           events_df[events_df['trial_type'] == '5_C']
+        rh_df = pd.concat([events_df[events_df['trial_type'] == '1-0_B'],
+                           events_df[events_df['trial_type'] == '1-0_C'],
+                           events_df[events_df['trial_type'] == '4-1_B'],
+                           events_df[events_df['trial_type'] == '4-1_C'],
+                            events_df[events_df['trial_type'] == '5-0_B'],
+                           events_df[events_df['trial_type'] == '5-0_C']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_df['trial_type'] = 'RightH'
         # Regroup and pass them
@@ -189,61 +193,61 @@ def trim_events_df(events_df, trim_by='LvR'):
 
     if trim_by=='event':
         # mostly for plotting
-        lh_l = pd.concat([ events_df[events_df['trial_type'] == '1_LEFT'],
-                           events_df[events_df['trial_type'] == '4_LEFT'],
-                           events_df[events_df['trial_type'] == '5_LEFT']
+        lh_l = pd.concat([ events_df[events_df['trial_type'] == '1-0_LEFT'],
+                           events_df[events_df['trial_type'] == '4-1_LEFT'],
+                           events_df[events_df['trial_type'] == '5-0_LEFT']
                           ]).sort_values(by='onset').reset_index(drop=True)
         lh_l['trial_type'] = 'Left hand - Move left'
-        lh_r = pd.concat([ events_df[events_df['trial_type'] == '1_RIGHT'],
-                           events_df[events_df['trial_type'] == '4_RIGHT'],
-                           events_df[events_df['trial_type'] == '5_RIGHT']
+        lh_r = pd.concat([ events_df[events_df['trial_type'] == '1-0_RIGHT'],
+                           events_df[events_df['trial_type'] == '4-1_RIGHT'],
+                           events_df[events_df['trial_type'] == '5-0_RIGHT']
                           ]).sort_values(by='onset').reset_index(drop=True)
         lh_r['trial_type'] = 'Left hand - Move right'
-        lh_d = pd.concat([ events_df[events_df['trial_type'] == '1_DOWN'],
-                           events_df[events_df['trial_type'] == '4_DOWN'],
-                           events_df[events_df['trial_type'] == '5_DOWN'],
+        lh_d = pd.concat([ events_df[events_df['trial_type'] == '1-0_DOWN'],
+                           events_df[events_df['trial_type'] == '4-1_DOWN'],
+                           events_df[events_df['trial_type'] == '5-0_DOWN'],
                           ]).sort_values(by='onset').reset_index(drop=True)
         lh_d['trial_type'] = 'Left hand - Move down'
-        lh_u = pd.concat([ events_df[events_df['trial_type'] == '1_UP'],
-                           events_df[events_df['trial_type'] == '4_UP'],
-                           events_df[events_df['trial_type'] == '5_UP']
+        lh_u = pd.concat([ events_df[events_df['trial_type'] == '1-0_UP'],
+                           events_df[events_df['trial_type'] == '4-1_UP'],
+                           events_df[events_df['trial_type'] == '5-0_UP']
                           ]).sort_values(by='onset').reset_index(drop=True)
         lh_u['trial_type'] = 'Left hand - Move up'
-        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1_B'],
-                           events_df[events_df['trial_type'] == '4_B'],
-                            events_df[events_df['trial_type'] == '5_B']
+        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1-0_B'],
+                           events_df[events_df['trial_type'] == '4-1_B'],
+                            events_df[events_df['trial_type'] == '5-0_B']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_jump['trial_type'] = 'Right hand - Jump'
-        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1_C'],
-                           events_df[events_df['trial_type'] == '4_C'],
-                           events_df[events_df['trial_type'] == '5_C']
+        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1-0_C'],
+                           events_df[events_df['trial_type'] == '4-1_C'],
+                           events_df[events_df['trial_type'] == '5-0_C']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_hit['trial_type'] = 'Right hand - Hit'
-        hl = pd.concat([events_df[events_df['trial_type'] == '1_HealthLoss'],
-                           events_df[events_df['trial_type'] == '4_HealthLoss'],
-                           events_df[events_df['trial_type'] == '5_HealthLoss']
+        hl = pd.concat([events_df[events_df['trial_type'] == '1-0_HealthLoss'],
+                           events_df[events_df['trial_type'] == '4-1_HealthLoss'],
+                           events_df[events_df['trial_type'] == '5-0_HealthLoss']
                           ]).sort_values(by='onset').reset_index(drop=True)
         hl['trial_type'] = 'Health loss'
         trimmed_df = pd.concat([lh_l, lh_r, lh_u, lh_d, rh_jump, rh_hit, hl]).sort_values(by='onset').reset_index(drop=True)
 
     if trim_by=='healthloss':
-        hl = pd.concat([events_df[events_df['trial_type'] == '1_HealthLoss'],
-                           events_df[events_df['trial_type'] == '4_HealthLoss'],
-                           events_df[events_df['trial_type'] == '5_HealthLoss']
+        hl = pd.concat([events_df[events_df['trial_type'] == '1-0_HealthLoss'],
+                           events_df[events_df['trial_type'] == '4-1_HealthLoss'],
+                           events_df[events_df['trial_type'] == '5-0_HealthLoss']
                           ]).sort_values(by='onset').reset_index(drop=True)
         hl['trial_type'] = 'HealthLoss'
         trimmed_df = hl
 
     if trim_by=='JvH':
-        # Create Left df
-        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1_B'],
-                           events_df[events_df['trial_type'] == '4_B'],
-                            events_df[events_df['trial_type'] == '5_B']
+        # Jump vs Hit df
+        rh_jump = pd.concat([events_df[events_df['trial_type'] == '1-0_B'],
+                           events_df[events_df['trial_type'] == '4-1_B'],
+                            events_df[events_df['trial_type'] == '5-0_B']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_jump['trial_type'] = 'Jump'
-        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1_C'],
-                           events_df[events_df['trial_type'] == '4_C'],
-                           events_df[events_df['trial_type'] == '5_C']
+        rh_hit = pd.concat([events_df[events_df['trial_type'] == '1-0_C'],
+                           events_df[events_df['trial_type'] == '4-1_C'],
+                           events_df[events_df['trial_type'] == '5-0_C']
                           ]).sort_values(by='onset').reset_index(drop=True)
         rh_hit['trial_type'] = 'Hit'
         trimmed_df = pd.concat([rh_jump, rh_hit]).sort_values(by='onset').reset_index(drop=True)
@@ -282,14 +286,13 @@ def plot_gameevents(events_df, colors='rand'):
             col_bank.append(tuple(np.random.choice(range(0, 10), size=3)/10))
     else:
          col_bank = colors
-
     masks = []
     colors_segs = []
     segs = []
-    for line in LvR_df.T.iteritems():
-        onset = line[1][0]
-        dur = line[1][1]
-        ttype = line[1][2]
+    for line in events_df.T.iteritems():
+        onset = line[1][1]
+        dur = line[1][2]
+        ttype = line[1][3]
         segs.append([(onset, trial_types.index(ttype)+1), (onset+dur, trial_types.index(ttype)+1)])
         mask = np.ma.masked_where((time_axis > onset) & (time_axis < onset+dur), time_axis)
         masks.append(mask)

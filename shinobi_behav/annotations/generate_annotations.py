@@ -23,15 +23,14 @@ def main():
                         filepath = path_to_data + 'shinobi/' + file
                         #print(filepath)
                         repvars = extract_variables(filepath)
-                        repvars['onset'] = startevents['onset'][idx]
-                        repvars['duration'] = startevents['duration'][idx]
+                        repvars['rep_onset'] = startevents['onset'][idx]
+                        repvars['rep_duration'] = startevents['duration'][idx]
                         runvars.append(repvars)
                 events_df = create_runevents(runvars, startevents, actions=actions)
-                events_path = path_to_data + 'processed/annotations/{}_{}_run-0{}.pkl'.format(sub, ses, run)
+                events_path = path_to_data + 'processed/annotations/{}_{}_run-0{}.csv'.format(sub, ses, run)
                 if not os.path.isdir(path_to_data + 'processed/annotations'):
                     os.makedirs(path_to_data + 'processed/annotations')
-                with open(events_path, 'wb') as f:
-                    pickle.dump(events_df, f)
+                events_df.to_csv(events_path)
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
