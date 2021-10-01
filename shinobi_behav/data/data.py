@@ -94,8 +94,9 @@ def retrieve_variables(files, level, bids=True, by_timestamps=True):
     allvars = variables_lists
     return allvars
 
-def extract_variables(file, setup='scan'):
-    """Gets and prints the spreadsheet's header columns
+def extract_variables(filepath, setup='scan'):
+    """Runs the logfile to generate a dict that saves all the variables indexed
+    in the data.json file.
 
     Parameters
     ----------
@@ -107,24 +108,27 @@ def extract_variables(file, setup='scan'):
 
     Returns
     -------
-    repvars
-        a dict containing all the variables extracted from the log file
+    repvars : dict
+        A dict containing all the variables extracted from the log file
     """
-    level = file[-11:-8]
-    date = file[-73:-65]
+
+    level = filepath[-11:-8]
+    date = filepath[-73:-65]
 
     if level == '1-0':
         env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
-    else:
-        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level'+level)
+    elif level == '4-1':
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level4-1')
+    elif level == '5-0':
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
     actions = env.buttons
 
     repvars = {}
-    repvars['filename'] = file
+    repvars['filename'] = filepath
     repvars['level'] = level
     repvars['date'] = date
 
-    key_log = retro.Movie(file)
+    key_log = retro.Movie(filepath)
     env.reset()
 
     while key_log.step():

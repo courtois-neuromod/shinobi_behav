@@ -99,55 +99,61 @@ def generate_healthloss_events(health, FS=60, dur=0.1):
     return events_df
 
 def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=True, get_actions=True, get_healthloss=True, get_startend=True):
-    onset_reps = startevents['onset'].values.tolist()
-    dur_reps = startevents['duration'].values.tolist()
+    """Create a Nilearn compatible events dataframe from game variables and start/duration info of repetitions
 
-    if get_aps:
-        try:
-            framewise_aps = compute_framewise_aps(runvars, actions=actions, FS=FS)
-        except Exception as e:
-            print(e)
+    Parameters
+    ----------
+    runvars : list
+        A list of repvars dicts, corresponding to the different repetitions of a run
+    FS : int
+        The sampling rate of the .bk2 file
+    min_dur : float
+    setup : str, optional
+        Can be 'scan', for files acquired during scanning sessions
+        or 'home', for files acquired at home during the training sessions.
+
+    Returns
+    -------
+    repvars :
+        A dict containing all the variables extracted from the log file
+    """
 
     # init df list
     all_df = []
+    for idx, repvars in enumerate(runvars):
 
-    for idx, onset_rep in enumerate(onset_reps):
-        if isinstance(startevents['stim_file'][idx], str):
-            lvl_rep =  startevents['stim_file'][idx][-11]
-
-            #print('Extracting events for {}'.format(runvars['filename'][idx]))
-            if get_actions:
-                # get the different possible actions
-                # generate events for each of them
-                for act in actions:
-                    var = runvars[act][idx]
-                    temp_df = generate_key_events(var, act, FS=FS)
-                    temp_df['onset'] = temp_df['onset'] + onset_rep
-                    temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
-                    all_df.append(temp_df)
-            if get_aps:
-                temp_df = generate_aps_events(framewise_aps, FS=FS)
-                temp_df['onset'] = temp_df['onset'] + onset_rep
-                temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
-                all_df.append(temp_df)
-            if get_healthloss:
-                temp_df = generate_healthloss_events(runvars['health'][idx], FS=FS, dur=0.1)
-                temp_df['onset'] = temp_df['onset'] + onset_rep
-                temp_df['trial_type'] = lvl_rep + '_' + temp_df['trial_type']
+        print('Extracting events for {}'.format(repvars['filename']))
+        if get_actions:
+            for act in actions:
+                var = repvars[act]
+                temp_df = generate_key_events(var, act, FS=FS)
+                temp_df['onset'] = temp_df['onset'] + repvars['onset']
+                temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
                 all_df.append(temp_df)
 
-        if all_df != []:
-            if get_startend:
-                temp_df = startevents.drop('stim_file', axis=1)
-                temp_df['trial_type'] = 'level_{}'.format(lvl_rep)
-                all_df.append(temp_df)
-                #todo : if get_endstart
-                #todo : if get_kills
-                #todo : if get_healthloss
+        if get_aps:
+            framewise_aps = compute_framewise_aps(repvars, actions=actions, FS=FS)
+            temp_df = generate_aps_events(framewise_aps, FS=FS)
+            temp_df['onset'] = temp_df['onset'] + repvars['onset']
+            temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
+            all_df.append(temp_df)
 
-            events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
-        else:
-            events_df = pd.DataFrame()
+        if get_healthloss:
+            temp_df = generate_healthloss_events(repvars['health'], FS=FS, dur=0.1)
+            temp_df['onset'] = temp_df['onset'] + repvars['onset']
+            temp_df['trial_type'] = repvars['level'] + '_' + temp_df['trial_type']
+            all_df.append(temp_df)
+
+        if get_startend:
+            temp_df = startevents.drop('stim_file', axis=1)
+            temp_df['trial_type'] = 'level_{}'.format(repvars['level'])
+            all_df.append(temp_df)
+
+        #todo : if get_endstart -- what did I mean by that ?
+        #todo : if get_kills
+
+        events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
+
         return events_df
 
 
