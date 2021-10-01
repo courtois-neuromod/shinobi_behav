@@ -99,24 +99,32 @@ def generate_healthloss_events(health, FS=60, dur=0.1):
                                'trial_type':trial_type})
     return events_df
 
-def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=True, get_actions=True, get_healthloss=True, get_startend=True):
+def create_runevents(runvars, actions, FS=60, min_dur=1, get_aps=True, get_actions=True, get_healthloss=True, get_startend=True):
     """Create a Nilearn compatible events dataframe from game variables and start/duration info of repetitions
 
     Parameters
     ----------
     runvars : list
         A list of repvars dicts, corresponding to the different repetitions of a run
+    actions : list of strings
+        A list that contains the name of all the action variables
     FS : int
         The sampling rate of the .bk2 file
     min_dur : float
-    setup : str, optional
-        Can be 'scan', for files acquired during scanning sessions
-        or 'home', for files acquired at home during the training sessions.
+        Minimum duration of an event, currently only used for APS events
+    get_aps : boolean
+        If True, generates low/high APS (action per second) segments based on framewise_APS
+    get_actions : boolean
+        If True, generates actions events based on key presses
+    get_healthloss : boolean
+        If True, generates health loss events based on changes on the "lives" variable
+    get_startend : boolean
+        If True, generates events indicating the start and end of each repetition
 
     Returns
     -------
-    repvars :
-        A dict containing all the variables extracted from the log file
+    events_df :
+        An events DataFrame in Nilearn-compatible format.  
     """
 
     # init df list
@@ -153,6 +161,7 @@ def create_runevents(runvars, startevents, actions, FS=60, min_dur=1, get_aps=Tr
 
         #todo : if get_endstart -- what did I mean by that ?
         #todo : if get_kills
+
     try:
         events_df = pd.concat(all_df).sort_values(by='onset').reset_index(drop=True)
     except ValueError:
