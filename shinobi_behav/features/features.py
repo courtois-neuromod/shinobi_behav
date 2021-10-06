@@ -35,37 +35,39 @@ def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, he
     '''
 
     data_dict = {}
-    if days_of_train:
-        data_dict['Days of training'] = compute_days_of_train(allvars)
-        print('Days of training computed')
-    else:
-        data_dict['Passage order'] =  [x for x in range(len(allvars['filename']))]
-        print('Passage order computed')
-    if rel_speed:
-        data_dict['Relative speed'] = compute_rel_speed(allvars)
-        print('Relative speed computed')
-    if health_lost:
-        data_dict['Health loss'] = compute_health_lost(allvars)
-        print('Health loss computed')
-    if max_score:
-        data_dict['Max score'] = compute_max_score(allvars)
-        print('Max score computed')
-    if completion_prob:
-        data_dict['Completion prob'] = compute_completed(allvars)
-        print('Completion probability computed')
-    if completion_perc:
-        data_dict['Percent complete'] = compute_completed_perc(allvars)
-        print('Completion percentage computed')
-    if completion_speed:
-        data_dict['Completion speed'] = compute_time2complete(allvars)
-        print('Completion speed computed')
+    start_of_training = allvars[0]['timestamp']
+    for repvars in allvars:
+        if days_of_train:
+            data_dict['Days of training'] = compute_days_of_train(repvars, timestamp)
+            print('Days of training computed')
+        else:
+            data_dict['Passage order'] =  [x for x in range(len(allvars['filename']))]
+            print('Passage order computed')
+        if rel_speed:
+            data_dict['Relative speed'] = compute_rel_speed(allvars)
+            print('Relative speed computed')
+        if health_lost:
+            data_dict['Health loss'] = compute_health_lost(allvars)
+            print('Health loss computed')
+        if max_score:
+            data_dict['Max score'] = compute_max_score(allvars)
+            print('Max score computed')
+        if completion_prob:
+            data_dict['Completion prob'] = compute_completed(allvars)
+            print('Completion probability computed')
+        if completion_perc:
+            data_dict['Percent complete'] = compute_completed_perc(allvars)
+            print('Completion percentage computed')
+        if completion_speed:
+            data_dict['Completion speed'] = compute_time2complete(allvars)
+            print('Completion speed computed')
 
-    if metric != None:
-        for key in data_dict.keys():
-            data_dict[key] = moving_descriptive(data_dict[key], N=10, metric=metric)
+        if metric != None:
+            for key in data_dict.keys():
+                data_dict[key] = moving_descriptive(data_dict[key], N=10, metric=metric)
     return data_dict
 
-def compute_days_of_train(allvars):
+def compute_days_of_train(repvars, timestamp):
     '''
     Translate timecodes into days-past-start-training. Starts at 1 instead of 0 (for exp/inverse fit)
 
@@ -86,7 +88,7 @@ def compute_days_of_train(allvars):
         days_of_training.append(d_training.days+1)
     return days_of_training
 
-def compute_max_score(allvars):
+def compute_max_score(repvars):
     '''
     Max score reached in each repetition.
 
@@ -97,7 +99,7 @@ def compute_max_score(allvars):
     Outputs :
     max_score = list with one element per repetition
     '''
-    max_score = [max(score_list) for score_list in allvars['score']]
+    max_score = max(repvars['score'])
     return max_score
 
 def compute_health_lost(allvars):
