@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import logging
 import shinobi_behav
-from shinobi_behav.data.data import combine_variables, remove_fake_reps
+from shinobi_behav.data.data import extract_variables, get_levelreps
 import os.path as op
 import pickle
 import os
 
 
 def main():
-    """ Runs data processing scripts to turn raw data from (../bids) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """ Extracts variables from bk2 files and stores them as lists of dictionnaries,
+    splitted by subject and by level, and sorted by date.
     """
     path_to_data = shinobi_behav.path_to_data
     logger = logging.getLogger(__name__)
-    logger.info('Processing datasets for at-home VS in-scanner visualization.')
+    logger.info('Processing datasets for at-home VS in-scanner analysis.')
     if not op.isdir(op.join(path_to_data, 'processed')):
         os.mkdir(op.join(path_to_data, 'processed'))
         logger.info('Directory created')
@@ -22,20 +22,15 @@ def main():
     # start loop
     for subj in shinobi_behav.subjects:
         for level in shinobi_behav.levels:
-            logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
-            logger.info('Training sessions (NUC)')
-            allvars_behav = combine_variables(path_to_data, subj, level, behav=True, save=False)
-            allvars_behav = remove_fake_reps(allvars_behav)
-            allvars_behav_path = op.join(path_to_data, 'processed','{}_{}_allvars_behav.pkl'.format(subj, level))
-            with open(allvars_behav_path, 'wb') as f:
-                pickle.dump(allvars_behav, f)
-            logger.info('Scan sessions')
-            allvars_scan = combine_variables(path_to_data, subj, level, behav=False, save=False)
-            allvars_scan = remove_fake_reps(allvars_scan)
-            allvars_scan_path = op.join(path_to_data, 'processed','{}_{}_allvars_scan.pkl'.format(subj, level))
-            with open(allvars_scan_path, 'wb') as f:
-                pickle.dump(allvars_scan, f)
-            logger.info('Done.')
+            for setup in ['scan', 'home']:
+                level_allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
+                if not os.path.exists(level_allvars_path):
+                    logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
+                    logger.info('Training sessions ({})'.format(setup))
+                    level_allvars = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
+                    with open(level_allvars_path, 'wb') as f:
+                        pickle.dump(allvars_behav, f)
+
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
