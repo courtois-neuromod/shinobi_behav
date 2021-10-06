@@ -109,14 +109,19 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         print('Processing : {} {}'.format(subject, sess))
         for file in tqdm(sorted(allfiles)):
             fpath = file_template.format(subject, sess, file)
-            repvars = extract_variables(fpath, setup=setup)
-            if remove_fake_reps:# remove fake reps
-                if compute_max_score(repvars) > 200:
-                    level_allvars.append(repvars)
+            try:
+                repvars = extract_variables(fpath, setup=setup)
+                if remove_fake_reps:# remove fake reps
+                    if compute_max_score(repvars) > 200:
+                        level_allvars.append(repvars)
+                    else:
+                        n_fakereps += 1
                 else:
-                    n_fakereps += 1
-            else:
-                level_allvars.append(repvars)
+                    level_allvars.append(repvars)
+            except RuntimeError as e:
+                print('Failed extraction for {} because of RuntimeError : '.format(file))
+                print(e)
+                continue
     if remove_fake_reps:
         print('Removed a total of {} fake reps (max score <= 200)'.format(n_fakereps))
     return level_allvars
