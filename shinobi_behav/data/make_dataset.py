@@ -9,7 +9,8 @@ import os
 
 def main():
     """ Extracts variables from bk2 files and stores them as lists of dictionnaries,
-    splitted by subject and by level, and sorted by date.
+    splitted by subject and by level, and sorted by date. Prerequisite for
+    features computation intended for home vs scan analysis.
     """
     path_to_data = shinobi_behav.path_to_data
     logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ def main():
         logger.info('Directory created')
     else:
         logger.info('Directory already exists')
-    # start loop
+
     for subj in shinobi_behav.subjects:
         for level in shinobi_behav.levels:
             for setup in ['scan', 'home']:
