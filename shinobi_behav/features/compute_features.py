@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import shinobi_behav
-from shinobi_behav.data.data import combine_variables, remove_fake_reps
+from shinobi_behav.data.data import get_levelreps
 from features import load_features_dict
 import click
 
@@ -14,12 +14,12 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info('Create repetition-wise features')
 
+    setup='home'
     # start loop
     for subj in shinobi_behav.subjects:
         for level in shinobi_behav.levels:
             logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
-            allvars = combine_variables(path_to_data, subj, level)
-            allvars = remove_fake_reps(allvars)
+            allvars = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
             load_features_dict(path_to_data, subj, level, save=True, metric='mean', allvars=allvars)
             load_features_dict(path_to_data, subj, level, save=True, metric=None, allvars=allvars)
 

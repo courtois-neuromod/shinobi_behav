@@ -8,11 +8,37 @@ import scipy.signal as signal
 
 
 def load_features_dict(path_to_data, subject, level, save=True, metric=None, days_of_train=True, allvars=None):
-    '''
-    Load the features dict, create it if doesn't exists already.
-    '''
+    """Load the features dict, create it if doesn't exists already.
+
+    Parameters
+    ----------
+    path_to_data : str
+        The path to the data/ folder. Default is ./data/ or as defined in shinobi_behav.params
+    subject : str
+        Subject number, starts with 0 (ex. 01)
+    level : str
+        Level. Can be '1-0', '4-1' or '5-0'
+    setup : str, optional
+        Can be 'scan', for files acquired during scanning sessions
+        or 'home', for files acquired at home during the training sessions.
+    save : bool, optional
+        If True, will save the features dict if it needs to be created.
+    metric : str, optional
+        Can be 'mean' or 'median'. If metric is not None, the repetitions will
+        be transformed with a moving average or moving median (n=10, step=1 by default)
+    days_of_train : bool, optional
+        If True, features will be expressed in number of days elapsed
+        since the training started (broke ?)
+    allvars : list, optional
+        If the features dict doesn't exist yet, passes the allvars list to create it (WiP)
+
+    Returns
+    -------
+    data_dict : dict
+        A dict containing all the features computed from the given repetitions
+    """
     #files = [op.join(path_to_data, subject, level, file) for file in os.listdir(op.join(path_to_data, subject, level)) if not 'npy' in file]
-    data_dict_path = op.join(path_to_data, 'processed', '{}_{}_repwise_feats_{}.pkl'.format(subject, level, metric))
+    data_dict_path = op.join(path_to_data, 'processed', '{}_{}_{}_repfeats_{}.pkl'.format(subject, level, setup, metric))
     if not(op.isfile(data_dict_path)):
         data_dict = aggregate_vars(allvars, metric=metric,
                            rel_speed=True,
@@ -31,7 +57,7 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
 
 def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, health_lost=False, max_score=False, completion_prob=False, completion_perc=False, completion_speed=False):
     '''
-    Aggregate variables into features and store them in a dict
+    Aggregate variables into repetition-level features and store them in a dict
     '''
 
     data_dict = {}
@@ -89,16 +115,18 @@ def compute_days_of_train(repvars, timestamp):
     return days_of_training
 
 def compute_max_score(repvars):
-    '''
-    Max score reached in each repetition.
+    """Get the maximum score of a repetition.
 
-    Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = frames
+    Parameters
+    ----------
+    repvars : dict
+        A dict containing all the variables extracted from the log file
 
-    Outputs :
-    max_score = list with one element per repetition
-    '''
+    Returns
+    -------
+    max_score : int
+        The maximum score reached across the repetition
+    """
     max_score = max(repvars['score'])
     return max_score
 
