@@ -38,7 +38,7 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
         A dict containing all the features computed from the given repetitions
     """
     #files = [op.join(path_to_data, subject, level, file) for file in os.listdir(op.join(path_to_data, subject, level)) if not 'npy' in file]
-    data_dict_path = op.join(path_to_data, 'processed', '{}_{}_{}_repfeats_{}.pkl'.format(subject, level, setup, metric))
+    data_dict_path = op.join(path_to_data, 'processed', '{}_{}_home_repfeats_{}.pkl'.format(subject, level, setup, metric))
     if not(op.isfile(data_dict_path)):
         data_dict = aggregate_vars(allvars, metric=metric,
                            rel_speed=True,
