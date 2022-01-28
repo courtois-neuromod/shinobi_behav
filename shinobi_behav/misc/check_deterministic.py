@@ -8,7 +8,7 @@ subject = 'sub-01'
 
 sess = 'ses-shinobi_004'
 
-path_to_data = shinobi_behav.path_to_data
+path_to_data = shinobi_behav.DATA_PATH
 file = os.listdir(op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess))[0]
 filepath = op.join(path_to_data, 'shinobi', 'sourcedata', subject, sess, file)
 

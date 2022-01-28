@@ -10,14 +10,14 @@ def main():
     """ Create averaged features based on the datadicts in ./data/processed/
     These features are then used to plot the learning curves with src/visualization/generate_lcurves.py
     """
-    path_to_data = shinobi_behav.path_to_data
+    path_to_data = shinobi_behav.DATA_PATH
     logger = logging.getLogger(__name__)
     logger.info('Create repetition-wise features')
 
     setup='home'
     # start loop
-    for subj in shinobi_behav.subjects:
-        for level in shinobi_behav.levels:
+    for subj in shinobi_behav.SUBJECTS:
+        for level in shinobi_behav.LEVELS:
             logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
             allvars = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
             load_features_dict(path_to_data, subj, level, save=True, metric='mean', allvars=allvars)

@@ -13,7 +13,7 @@ def main():
     These features are then used to plot the learning curves with src/visualization/generate_lcurves.py.
     src.features.build_features.py must be ran before using generate_lcurves
     """
-    path_to_data = shinobi_behav.path_to_data
+    path_to_data = shinobi_behav.DATA_PATH
     logger = logging.getLogger(__name__)
     logger.info('create repetition-wise features')
     usable_filenames_all = {}

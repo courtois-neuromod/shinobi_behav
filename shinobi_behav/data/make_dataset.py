@@ -12,7 +12,7 @@ def main():
     splitted by subject and by level, and sorted by date. Prerequisite for
     features computation intended for home vs scan analysis.
     """
-    path_to_data = shinobi_behav.path_to_data
+    path_to_data = shinobi_behav.DATA_PATH
     logger = logging.getLogger(__name__)
     logger.info('Processing datasets for at-home VS in-scanner analysis.')
     if not op.isdir(op.join(path_to_data, 'processed')):
@@ -21,8 +21,8 @@ def main():
     else:
         logger.info('Directory already exists')
 
-    for subj in shinobi_behav.subjects:
-        for level in shinobi_behav.levels:
+    for subj in shinobi_behav.SUBJECTS:
+        for level in shinobi_behav.LEVELS:
             for setup in ['scan', 'home']:
                 level_allvars_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
                 if not os.path.exists(level_allvars_path):
