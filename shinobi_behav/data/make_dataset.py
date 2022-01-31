@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import shinobi_behav
-from shinobi_behav.data.data import extract_variables, get_levelreps
+from shinobi_behav.data.data import get_levelreps
 import os.path as op
 import pickle
 import os
