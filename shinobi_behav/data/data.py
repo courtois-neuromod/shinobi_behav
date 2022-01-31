@@ -22,7 +22,7 @@ def extract_variables(filepath, setup='scan'):
 
     Returns
     -------
-    repvars : dict
+    repetition_variables : dict
         A dict containing all the variables extracted from the log file
     """
     if setup == 'scan':
@@ -48,10 +48,10 @@ def extract_variables(filepath, setup='scan'):
         env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
     actions = env.buttons
 
-    repvars = {}
-    repvars['filename'] = filepath
-    repvars['level'] = level
-    repvars['timestamp'] = timestamp
+    repetition_variables = {}
+    repetition_variables['filename'] = filepath
+    repetition_variables['level'] = level
+    repetition_variables['timestamp'] = timestamp
 
     key_log = retro.Movie(filepath)
     env.reset()
@@ -61,19 +61,19 @@ def extract_variables(filepath, setup='scan'):
         _,_,done,i = env.step(a)
 
         for variable in i.keys(): # fill up dict
-            if variable not in repvars: # init entry first
-                repvars[variable] = []
-            repvars[variable].append(i[variable])
+            if variable not in repetition_variables: # init entry first
+                repetition_variables[variable] = []
+            repetition_variables[variable].append(i[variable])
         for idx_a, action in enumerate(actions):
-            if action not in repvars:
-                repvars[action] = []
-            repvars[action].append(a[idx_a])
+            if action not in repetition_variables:
+                repetition_variables[action] = []
+            repetition_variables[action].append(a[idx_a])
     env.close()
-    return repvars
+    return repetition_variables
 
 
 def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=True):
-    """Generates a list of the repvars dicts for all repetitions of a level.
+    """Generates a list of the repetition_variables dicts for all repetitions of a level.
 
     Parameters
     ----------
@@ -89,7 +89,7 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
 
     Returns
     -------
-    level_allvars : dict
+    level_variables : dict
         A dict containing all the variables extracted from the log file
     """
     if setup == 'home':
@@ -102,7 +102,7 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         file_template = path_to_data + 'shinobi/sourcedata/{}/{}/{}'
 
     n_fakereps = 0
-    level_allvars = []
+    level_variables = []
     sessions  = [sesname for sesname in os.listdir(subject_template.format(subject)) if 'ses' in sesname]
     for sess in sorted(sessions):
         allfiles = [filename for filename in os.listdir(session_template.format(subject, sess)) if 'bk2' in filename]
@@ -110,18 +110,19 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         for file in tqdm(sorted(allfiles)):
             fpath = file_template.format(subject, sess, file)
             try:
-                repvars = extract_variables(fpath, setup=setup)
+                repetition_variables = extract_variables(fpath, setup=setup)
+                
                 if remove_fake_reps:# remove fake reps
-                    if compute_max_score(repvars) > 200:
-                        level_allvars.append(repvars)
+                    if compute_max_score(repetition_variables) > 200:
+                        level_variables.append(repetition_variables)
                     else:
                         n_fakereps += 1
                 else:
-                    level_allvars.append(repvars)
+                    level_variables.append(repetition_variables)
             except RuntimeError as e:
                 print('Failed extraction for {} because of RuntimeError : '.format(file))
                 print(e)
                 continue
     if remove_fake_reps:
         print('Removed a total of {} fake reps (max score <= 200)'.format(n_fakereps))
-    return level_allvars
+    return level_variables
