@@ -93,13 +93,14 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         A dict containing all the variables extracted from the log file
     """
     if setup == 'home':
-        subject_template = path_to_data + 'shinobi_beh/{}'
-        session_template = path_to_data + 'shinobi_beh/{}/{}/beh'
-        file_template = path_to_data + 'shinobi_beh/{}/{}/beh/{}'
+        subject_template = op.join(path_to_data, 'shinobi_beh', '{}')
+        session_template = op.join(path_to_data, 'shinobi_beh', '{}', '{}', 'beh')
+        file_template = op.join(path_to_data, 'shinobi_beh', '{}', '{}', 'beh', '{}')
     elif setup == 'scan':
-        subject_template = path_to_data + 'shinobi/sourcedata/{}'
-        session_template = path_to_data + 'shinobi/sourcedata/{}/{}'
-        file_template = path_to_data + 'shinobi/sourcedata/{}/{}/{}'
+        subject_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}')
+        session_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}')
+        file_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}', '{}')
+        
 
     n_fakereps = 0
     level_variables = []
@@ -111,7 +112,7 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
             fpath = file_template.format(subject, sess, file)
             try:
                 repetition_variables = extract_variables(fpath, setup=setup)
-                
+
                 if remove_fake_reps:# remove fake reps
                     if compute_max_score(repetition_variables) > 200:
                         level_variables.append(repetition_variables)
@@ -125,4 +126,4 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
                 continue
     if remove_fake_reps:
         print('Removed a total of {} fake reps (max score <= 200)'.format(n_fakereps))
-    return level_variables
+    return level_variables, n_fakereps
