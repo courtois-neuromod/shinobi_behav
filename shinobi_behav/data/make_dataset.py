@@ -30,7 +30,7 @@ def main():
                     logger.info('Training sessions ({})'.format(setup))
                     level_variables = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
                     with open(level_variables_path, 'wb') as f:
-                        pickle.dump(repetition_variables, f)
+                        pickle.dump(level_variables, f)
 
 
 if __name__ == '__main__':
