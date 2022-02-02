@@ -24,8 +24,8 @@ def main():
     for subj in shinobi_behav.SUBJECTS:
         for level in shinobi_behav.LEVELS:
             for setup in ['scan', 'home']:
-                repetition_variables_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
-                if not os.path.exists(repetition_variables_path):
+                level_variables_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
+                if not os.path.exists(level_variables_path):
                     logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
                     logger.info('Training sessions ({})'.format(setup))
                     level_variables = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
