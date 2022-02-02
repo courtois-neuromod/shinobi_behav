@@ -43,7 +43,7 @@ def extract_variables(filepath, setup='scan'):
     if level == '1-0':
         env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level1')
     elif level == '4-1':
-        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level4-1')
+        env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level4')
     elif level == '5-0':
         env = retro.make('ShinobiIIIReturnOfTheNinjaMaster-Genesis', state='Level5')
     actions = env.buttons
@@ -100,7 +100,7 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         subject_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}')
         session_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}')
         file_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}', '{}')
-        
+
 
     n_fakereps = 0
     level_variables = []
