@@ -123,7 +123,7 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
             except RuntimeError as e:
                 print('Failed extraction for {} because of RuntimeError : '.format(file))
                 print(e)
-                continue
+
     if remove_fake_reps:
         print('Removed a total of {} fake reps (max score <= 200)'.format(n_fakereps))
     return level_variables, n_fakereps
