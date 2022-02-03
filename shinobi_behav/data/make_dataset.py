@@ -18,7 +18,7 @@ parser.add_argument(
 parser.add_argument(
 	"-l",
 	"--level",
-	default = True,
+	default = '1-0',
 	type = str,
 	help="Level to process"
 )
