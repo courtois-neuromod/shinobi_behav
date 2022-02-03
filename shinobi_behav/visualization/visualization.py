@@ -26,7 +26,6 @@ def learning_curve(data_dict, time, variable,
     else:
         ylabel = variable
 
-
     # Sigmoid fit
     if 'sigm' in curves:
         try:
@@ -80,6 +79,20 @@ def learning_curve(data_dict, time, variable,
         ax.tick_params(axis='y', labelsize=15)
         return ax, days_thresh
     return days_thresh
+
+def lcurves_plot(data_dict, variables, title):
+    fig, axes = plt.subplots(len(variables), 1, figsize=(5,20))
+
+    for idx, var in enumerate(variables):
+        ax, idx_thresh = learning_curve(data_dict, 'Days of training', var,
+                                    zscore=False, plot=True,
+                                    x_jitter=1, y_jitter=0.1,
+                                    ax=axes[idx], plotlabels=True, threshold = None, curves=[])
+    # Adjust overall plots
+    for ax in fig.get_axes():
+        ax.label_outer()
+    fig.suptitle(title, y=0.92, fontsize=20)
+    return fig
 
 def fetch_usable_reps(allvars, data_dict, median_thresh):
     '''
