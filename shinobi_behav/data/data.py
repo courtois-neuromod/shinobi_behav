@@ -86,6 +86,8 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
     setup : str, optional
         Can be 'scan', for files acquired during scanning sessions
         or 'home', for files acquired at home during the training sessions.
+    remove_fake_reps : bool
+        If True, ignore files with max_score < 200
 
     Returns
     -------
@@ -101,8 +103,8 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         session_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}')
         file_template = op.join(path_to_data, 'shinobi', 'sourcedata', '{}', '{}', '{}')
 
-
-    n_fakereps = 0
+    names_fakereps = []
+    names_emptyfiles = []
     level_variables = []
     sessions  = [sesname for sesname in os.listdir(subject_template.format(subject)) if 'ses' in sesname]
     for sess in sorted(sessions):
@@ -113,17 +115,19 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
             try:
                 repetition_variables = extract_variables(fpath, setup=setup)
 
-                if remove_fake_reps:# remove fake reps
+                if remove_fake_reps:
                     if compute_max_score(repetition_variables) > 200:
                         level_variables.append(repetition_variables)
                     else:
-                        n_fakereps += 1
+                        names_fakereps.append(fpath)
                 else:
                     level_variables.append(repetition_variables)
             except RuntimeError as e:
-                print('Failed extraction for {} because of RuntimeError : '.format(file))
+                print(f'Failed extraction for {file} because of RuntimeError : ')
                 print(e)
-
+                names_empty_files.append(fpath)
+                
     if remove_fake_reps:
-        print('Removed a total of {} fake reps (max score <= 200)'.format(n_fakereps))
-    return level_variables, n_fakereps
+        print(f'Removed a total of {len(names_fakereps)} fake reps (max score <= 200)')
+    print(f'Found a total of {len(names_emptyfiles)} empty files (leading to "movie could not be loaded" errors)')
+    return level_variables, names_fakereps, names_emptyfiles
