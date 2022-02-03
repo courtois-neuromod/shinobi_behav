@@ -8,4 +8,4 @@
 
 module load python/3.8.0
 
-/home/hyruuk/python_envs/shinobi_env/bin/python /project/def-pbellec/hyruuk/shinobi_fmri/data/shinobi_behav/shinobi_behav/data/make_dataset.py
+/home/hyruuk/python_envs/shinobi_env/bin/python /project/def-pbellec/hyruuk/shinobi_fmri/data/shinobi_behav/shinobi_behav/data/make_dataset.py -s $1 -l $2

@@ -5,7 +5,25 @@ from shinobi_behav.data.data import get_levelreps
 import os.path as op
 import pickle
 import os
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-s",
+    "--subject",
+    default='04',
+    type=str,
+    help="Subject to process",
+)
+parser.add_argument(
+	"-l",
+	"--level",
+	default = True,
+	type = str,
+	help="Level to process"
+)
+
+args = parser.parse_args()
 
 def main():
     """ Extracts variables from bk2 files and stores them as lists of dictionnaries,
@@ -13,6 +31,8 @@ def main():
     features computation intended for the analysis of learning progression.
     """
     path_to_data = shinobi_behav.DATA_PATH
+    subj = 'subj-' + args.subject
+    level = args.level
     logger = logging.getLogger(__name__)
     logger.info('Processing datasets for at-home VS in-scanner analysis.')
     if not op.isdir(op.join(path_to_data, 'processed')):
@@ -21,16 +41,16 @@ def main():
     else:
         logger.info('Directory already exists')
 
-    for subj in shinobi_behav.SUBJECTS:
-        for level in shinobi_behav.LEVELS:
-            for setup in ['scan', 'home']:
-                level_variables_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
-                if not os.path.exists(level_variables_path):
-                    logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
-                    logger.info('Training sessions ({})'.format(setup))
-                    level_variables = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
-                    with open(level_variables_path, 'wb') as f:
-                        pickle.dump(level_variables, f)
+#    for subj in shinobi_behav.SUBJECTS:
+#        for level in shinobi_behav.LEVELS:
+    for setup in ['scan', 'home']:
+        level_variables_path = op.join(path_to_data, 'processed','{}_{}_allvars_{}.pkl'.format(subj, level, setup))
+        if not os.path.exists(level_variables_path):
+            logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
+            logger.info('Training sessions ({})'.format(setup))
+            level_variables = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
+            with open(level_variables_path, 'wb') as f:
+                pickle.dump(level_variables, f)
 
 
 if __name__ == '__main__':
