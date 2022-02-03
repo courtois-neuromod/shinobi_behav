@@ -31,7 +31,7 @@ def main():
     features computation intended for the analysis of learning progression.
     """
     path_to_data = shinobi_behav.DATA_PATH
-    subj = 'subj-' + args.subject
+    subj = 'sub-' + args.subject
     level = args.level
     logger = logging.getLogger(__name__)
     logger.info('Processing datasets for at-home VS in-scanner analysis.')
