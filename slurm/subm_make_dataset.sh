@@ -2,9 +2,9 @@
 #SBATCH --account=rrg-pbellec
 #SBATCH --time=12:00:00
 #SBATCH --job-name=shi_make_dataset
-#SBATCH --mem=128G
+#SBATCH --mem=32G
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks-per-node=8
 
 module load python/3.8.0
 
