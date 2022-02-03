@@ -7,7 +7,7 @@ from scipy.stats import percentileofscore
 import scipy.signal as signal
 
 
-def load_features_dict(path_to_data, subject, level, save=True, metric=None, days_of_train=True, allvars=None):
+def load_features_dict(path_to_data, subject, level, setup='home', save=True, metric=None, days_of_train=True, allvars=None):
     """Load the features dict, create it if doesn't exists already.
 
     Parameters
@@ -34,13 +34,13 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
 
     Returns
     -------
-    data_dict : dict
+    features_dict : dict
         A dict containing all the features computed from the given repetitions
     """
-    #files = [op.join(path_to_data, subject, level, file) for file in os.listdir(op.join(path_to_data, subject, level)) if not 'npy' in file]
-    data_dict_path = op.join(path_to_data, 'processed', '{}_{}_home_repfeats_{}.pkl'.format(subject, level, setup, metric))
-    if not(op.isfile(data_dict_path)):
-        data_dict = aggregate_vars(allvars, metric=metric,
+
+    features_dict_path = op.join(path_to_data, 'processed', f'{subject}_{level}_{setup}_features_{metric}.pkl')
+    if not(op.isfile(features_dict_path)):
+        features_dict = aggregate_vars(allvars, metric=metric,
                            rel_speed=True,
                            health_lost=True,
                            max_score=True,
@@ -48,50 +48,50 @@ def load_features_dict(path_to_data, subject, level, save=True, metric=None, day
                            completion_perc=True,
                            days_of_train=days_of_train)
         if save == True:
-            with open(data_dict_path, 'wb') as f:
-                pickle.dump(data_dict, f)
+            with open(features_dict_path, 'wb') as f:
+                pickle.dump(features_dict, f)
     else:
-        with open(data_dict_path, 'rb') as f:
-            data_dict = pickle.load(f)
-    return data_dict
+        with open(features_dict_path, 'rb') as f:
+            features_dict = pickle.load(f)
+    return features_dict
 
 def aggregate_vars(allvars, metric=None, days_of_train=True, rel_speed=False, health_lost=False, max_score=False, completion_prob=False, completion_perc=False, completion_speed=False):
     '''
     Aggregate variables into repetition-level features and store them in a dict
     '''
 
-    data_dict = {}
+    features_dict = {}
     start_of_training = allvars[0]['timestamp']
     for repvars in allvars:
         if days_of_train:
-            data_dict['Days of training'] = compute_days_of_train(repvars, timestamp)
+            features_dict['Days of training'] = compute_days_of_train(repvars, timestamp)
             print('Days of training computed')
         else:
-            data_dict['Passage order'] =  [x for x in range(len(allvars['filename']))]
+            features_dict['Passage order'] =  [x for x in range(len(allvars['filename']))]
             print('Passage order computed')
         if rel_speed:
-            data_dict['Relative speed'] = compute_rel_speed(allvars)
+            features_dict['Relative speed'] = compute_rel_speed(allvars)
             print('Relative speed computed')
         if health_lost:
-            data_dict['Health loss'] = compute_health_lost(allvars)
+            features_dict['Health loss'] = compute_health_lost(allvars)
             print('Health loss computed')
         if max_score:
-            data_dict['Max score'] = compute_max_score(allvars)
+            features_dict['Max score'] = compute_max_score(allvars)
             print('Max score computed')
         if completion_prob:
-            data_dict['Completion prob'] = compute_completed(allvars)
+            features_dict['Completion prob'] = compute_completed(allvars)
             print('Completion probability computed')
         if completion_perc:
-            data_dict['Percent complete'] = compute_completed_perc(allvars)
+            features_dict['Percent complete'] = compute_completed_perc(allvars)
             print('Completion percentage computed')
         if completion_speed:
-            data_dict['Completion speed'] = compute_time2complete(allvars)
+            features_dict['Completion speed'] = compute_time2complete(allvars)
             print('Completion speed computed')
 
         if metric != None:
-            for key in data_dict.keys():
-                data_dict[key] = moving_descriptive(data_dict[key], N=10, metric=metric)
-    return data_dict
+            for key in features_dict.keys():
+                features_dict[key] = moving_descriptive(features_dict[key], N=10, metric=metric)
+    return features_dict
 
 def compute_days_of_train(repvars, timestamp):
     '''
