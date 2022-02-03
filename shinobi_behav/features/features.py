@@ -7,7 +7,11 @@ from scipy.stats import percentileofscore
 import scipy.signal as signal
 
 
+<<<<<<< HEAD
 def load_features_dict(path_to_data, subject, level, setup, save=True, metric=None, days_of_train=True, allvars=None):
+=======
+def load_features_dict(path_to_data, subject, level, setup='home', save=True, metric=None, days_of_train=True, allvars=None):
+>>>>>>> 67af8270718b5e1ce89e13d523f129ac887e0e08
     """Load the features dict, create it if doesn't exists already.
 
     Parameters
@@ -38,12 +42,17 @@ def load_features_dict(path_to_data, subject, level, setup, save=True, metric=No
         A dict containing all the features computed from the given repetitions
     """
 
+<<<<<<< HEAD
     features_dict_path = op.join(path_to_data, 'processed', f'{subject}_{level}_{setup}_repfeats_{metric}.pkl')
     if not(op.isfile(features_dict_path)):
 
         level_variables_path = op.join(path_to_data, 'processed',f'{subject}_{level}_allvars_{setup}.pkl'.format(subj, level, setup))
         with open(level_variables_path, 'rb') as f:
             allvars = pickle.load(f)
+=======
+    features_dict_path = op.join(path_to_data, 'processed', f'{subject}_{level}_{setup}_features_{metric}.pkl')
+    if not(op.isfile(features_dict_path)):
+>>>>>>> 67af8270718b5e1ce89e13d523f129ac887e0e08
         features_dict = aggregate_vars(allvars, metric=metric,
                            rel_speed=True,
                            health_lost=True,
