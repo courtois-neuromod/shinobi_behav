@@ -41,7 +41,7 @@ def load_features_dict(path_to_data, subject, level, setup, save=True, metric=No
     features_dict_path = op.join(path_to_data, 'processed', f'{subject}_{level}_{setup}_repfeats_{metric}.pkl')
     if not(op.isfile(features_dict_path)):
 
-        level_variables_path = op.join(path_to_data, 'processed',f'{subject}_{level}_allvars_{setup}.pkl'.format(subj, level, setup))
+        level_variables_path = op.join(path_to_data, 'processed',f'{subject}_{level}_allvars_{setup}.pkl')
         with open(level_variables_path, 'rb') as f:
             allvars = pickle.load(f)
         features_dict = aggregate_vars(allvars, metric=metric,
