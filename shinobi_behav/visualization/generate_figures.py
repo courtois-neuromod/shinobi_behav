@@ -40,12 +40,12 @@ def main():
     subj = args.subject
     level = args.level
 
-    print('Extracting game variables for {}_level-{}'.format(subj, level))
+    print('Extracting game variables for {subj}_level-{level}')
 
     data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean')
 
     # Generate and save plot
-    fig = lcurves_plot(data_dict, variables, '{}_level{}'.format(subj, level))
+    fig = lcurves_plot(data_dict, variables, f'{subj}_level{level}')
     fig.savefig(op.join(figures_path, f'{subj}_{level}_learning_curve.tif', dpi=300, bbox_inches='tight'))
 
 if __name__ == '__main__':
