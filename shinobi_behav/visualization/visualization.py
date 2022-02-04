@@ -81,6 +81,9 @@ def learning_curve(data_dict, time, variable,
     return days_thresh
 
 def lcurves_plot(data_dict, variables, title):
+    '''
+    Draw a figure containing the learning curves of a subject
+    '''
     fig, axes = plt.subplots(len(variables), 1, figsize=(5,20))
 
     for idx, var in enumerate(variables):
