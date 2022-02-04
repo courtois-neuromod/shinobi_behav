@@ -2,9 +2,8 @@ import logging
 import shinobi_behav
 from shinobi_behav.features.features import load_features_dict
 import click
-from visualization import learning_curve, fetch_usable_reps
+from shinobi_behav.visualization.visualization import lcurves_plot
 import matplotlib.pyplot as plt
-from src.data.data import combine_variables, remove_fake_reps
 import os.path as op
 import pickle
 import argparse
