@@ -37,7 +37,7 @@ def main():
     logger.info('create repetition-wise features')
     variables = ['Health loss', 'Max score', 'Percent complete']
 
-    subj = args.subject
+    subj = 'sub-' + args.subject
     level = args.level
 
     print('Extracting game variables for {subj}_level-{level}')
