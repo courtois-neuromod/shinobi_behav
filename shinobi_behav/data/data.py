@@ -125,8 +125,8 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
             except RuntimeError as e:
                 print(f'Failed extraction for {file} because of RuntimeError : ')
                 print(e)
-                names_empty_files.append(fpath)
-                
+                names_emptyfiles.append(fpath)
+
     if remove_fake_reps:
         print(f'Removed a total of {len(names_fakereps)} fake reps (max score <= 200)')
     print(f'Found a total of {len(names_emptyfiles)} empty files (leading to "movie could not be loaded" errors)')
