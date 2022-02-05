@@ -28,4 +28,4 @@ def list_save(fpath, list_to_save):
     """
     with open(fpath, "wb") as f:
         for element in list_to_save:
-            f.write(element + "\n")
+            f.write(str(element) + "\n")
