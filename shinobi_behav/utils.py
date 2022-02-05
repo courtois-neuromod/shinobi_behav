@@ -1,9 +1,9 @@
 import pickle
 
 
-def pickle_save(fpath, content):
+def pickle_save(fpath, object_to_save):
     """
-    Saves the content in a pickle file
+    Saves the python object in a pickle file
 
     Parameters
     ----------
@@ -13,4 +13,19 @@ def pickle_save(fpath, content):
         Python object
     """
     with open(fpath, "wb") as f:
-        pickle.dump(content, f)
+        pickle.dump(object_to_save, f)
+
+
+def list_save(fpath, list_to_save):
+    """Short summary.
+
+    Parameters
+    ----------
+    fpath : str
+        Path to the file to be created
+    list : list
+        Python list
+    """
+    with open(fpath, "wb") as f:
+        for element in list_to_save:
+            f.write(element + "\n")
