@@ -1,4 +1,3 @@
-import numpy as np
 import retro
 import os.path as op
 import pickle
@@ -7,6 +6,8 @@ import json
 from shinobi_behav.features.features import compute_max_score
 from tqdm import tqdm
 import time
+import shinobi_behav
+
 
 def extract_variables(filepath, setup='scan'):
     """Runs the logfile to generate a dict that saves all the variables indexed
@@ -57,13 +58,14 @@ def extract_variables(filepath, setup='scan'):
     env.reset()
 
     while key_log.step():
-        a = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
-        _,_,done,i = env.step(a)
+        action_list = [key_log.get_key(i, 0) for i in range(env.num_buttons)]
+        _, _, _, state_variables = env.step(action_list)
 
-        for variable in i.keys(): # fill up dict
+        for variable in state_variables.keys(): # fill up dict
+
             if variable not in repetition_variables: # init entry first
                 repetition_variables[variable] = []
-            repetition_variables[variable].append(i[variable])
+            repetition_variables[variable].append(state_variables[variable])
         for idx_a, action in enumerate(actions):
             if action not in repetition_variables:
                 repetition_variables[action] = []
@@ -131,3 +133,35 @@ def get_levelreps(path_to_data, subject, level, setup='home', remove_fake_reps=T
         print(f'Removed a total of {len(names_fakereps)} fake reps (max score <= 200)')
     print(f'Found a total of {len(names_emptyfiles)} empty files (leading to "movie could not be loaded" errors)')
     return level_variables, names_fakereps, names_emptyfiles
+
+
+def extract_and_save_corrupted_files():
+    for setup in ['home', 'scan']:
+        emptyfiles = []
+        fakereps = []
+        for subj in shinobi_behav.SUBJECTS:
+            for level in ['1-0', '4-1', '5-0']:
+                varfile_fpath = op.join(shinobi_behav.DATA_PATH, 'processed', f'{subj}_{level}_allvars_{setup}.pkl')
+                with open(varfile_fpath, 'rb') as f:
+                    _, names_fakereps, names_emptyfiles = pickle.load(f)
+                fakereps.append(names_fakereps)
+                emptyfiles.append(names_emptyfiles)
+        emptyfiles_fname = op.join(shinobi_behav.DATA_PATH, 'processed', f'{setup}_emptyfiles.pkl')
+        fakereps_fname = op.join(shinobi_behav.DATA_PATH, 'processed', f'{setup}_fakereps.pkl')
+        pickle_save(emptyfiles_fname, emptyfiles)
+        pickle_save(fakereps_fname, fakereps)
+
+
+def pickle_save(fpath, content):
+    '''
+    Saves the content in a pickle file
+
+    Parameters
+    ----------
+    fpath : str
+        Path to the file to be created
+    content : str
+        Python object
+    '''
+    with open(fpath, 'wb') as f:
+        pickle.dump(content, f)

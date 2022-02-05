@@ -48,7 +48,7 @@ def main():
         if not os.path.exists(level_variables_path):
             logger.info('Extracting game variables for {}_level-{}'.format(subj, level))
             logger.info('Training sessions ({})'.format(setup))
-            level_variables = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
+            level_variable = get_levelreps(path_to_data, subj, level, remove_fake_reps=True, setup=setup)
             with open(level_variables_path, 'wb') as f:
                 pickle.dump(level_variables, f)
 
