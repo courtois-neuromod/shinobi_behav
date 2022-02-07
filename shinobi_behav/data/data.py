@@ -44,12 +44,8 @@ def extract_variables(filepath, setup):
             metadata = json.load(json_file)
             timestamp = int(metadata["LevelStartTimestamp"])
 
-    if level == "1-0":
-        env = retro.make("ShinobiIIIReturnOfTheNinjaMaster-Genesis", state="Level1")
-    elif level == "4-1":
-        env = retro.make("ShinobiIIIReturnOfTheNinjaMaster-Genesis", state="Level4")
-    elif level == "5-0":
-        env = retro.make("ShinobiIIIReturnOfTheNinjaMaster-Genesis", state="Level5")
+    env = retro.make("ShinobiIIIReturnOfTheNinjaMaster-Genesis", state=f"Level{level}")
+
     key_log = retro.Movie(filepath)
     env.reset()
     repetition_variables = init_variables_dict(filepath, level, timestamp, env, key_log)
@@ -157,9 +153,11 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
         A dict containing all the variables extracted from the log file
     """
     if setup == "home":
-        subject_template = op.join(path_to_data, "shinobi_beh", "{}")
-        session_template = op.join(path_to_data, "shinobi_beh", "{}", "{}", "beh")
-        file_template = op.join(path_to_data, "shinobi_beh", "{}", "{}", "beh", "{}")
+        subject_template = op.join(path_to_data, "shinobi_training", "{}")
+        session_template = op.join(path_to_data, "shinobi_training", "{}", "{}", "beh")
+        file_template = op.join(
+            path_to_data, "shinobi_training", "{}", "{}", "beh", "{}"
+        )
     elif setup == "scan":
         subject_template = op.join(path_to_data, "shinobi", "sourcedata", "{}")
         session_template = op.join(path_to_data, "shinobi", "sourcedata", "{}", "{}")
@@ -227,5 +225,7 @@ def extract_and_save_corrupted_files():
         fakereps_fname = op.join(
             shinobi_behav.DATA_PATH, "processed", f"{setup}_fakereps.txt"
         )
+        emptyfiles = [item for flist in emptyfiles for item in flist]
+        fakereps = [item for flist in fakereps for item in flist]
         list_save(emptyfiles_fname, emptyfiles)
         list_save(fakereps_fname, fakereps)
