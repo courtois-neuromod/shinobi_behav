@@ -17,7 +17,7 @@ def pickle_save(fpath, object_to_save):
 
 
 def list_save(fpath, list_to_save):
-    """Short summary.
+    """Saves the python list in a text file, with items separated by lines.
 
     Parameters
     ----------
@@ -26,6 +26,6 @@ def list_save(fpath, list_to_save):
     list : list
         Python list
     """
-    with open(fpath, "wb") as f:
+    with open(fpath, "w") as f:
         for element in list_to_save:
             f.write(str(element) + "\n")
