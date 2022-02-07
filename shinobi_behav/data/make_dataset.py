@@ -33,7 +33,7 @@ def main():
     # Start loop
     for setup in ["scan", "home"]:
         level_variables_path = op.join(
-            path_to_data, "processed", f"{subj}_{level}_allvars_{setup}.pkl"
+            path_to_data, "processed", f"{subj}_{level}_levelwise_variables_{setup}.pkl"
         )
         if not os.path.exists(level_variables_path):
             logger.info(f"Extracting game variables for {subj}_level-{level}")

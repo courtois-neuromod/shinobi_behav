@@ -213,7 +213,7 @@ def extract_and_save_corrupted_files():
                 varfile_fpath = op.join(
                     shinobi_behav.DATA_PATH,
                     "processed",
-                    f"{subj}_{level}_allvars_{setup}.pkl",
+                    f"{subj}_{level}_levelwise_variables_{setup}.pkl",
                 )
                 with open(varfile_fpath, "rb") as f:
                     _, names_fakereps, names_emptyfiles = pickle.load(f)

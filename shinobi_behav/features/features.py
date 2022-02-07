@@ -10,14 +10,16 @@ import scipy.signal as signal
 def load_features_dict(
     path_to_data, subject, level, setup, save=True, metric=None, days_of_train=True
 ):
-    """Load the features dict, create it if doesn't exists already.
+    """Load the features dict, creates it from the processed variables files
+    if doesn't exists already.
 
     Parameters
     ----------
     path_to_data : str
-        The path to the data/ folder. Default is ./data/ or as defined in shinobi_behav.params
+        The path to the data/ folder. Default is ./data/ or as defined in
+        shinobi_behav.params
     subject : str
-        Subject number, starts with 0 (ex. sub-01)
+        Subject number, starts with sub-0 (ex. sub-01)
     level : str
         Level. Can be '1', '4' or '5'
     setup : str, optional
@@ -27,7 +29,8 @@ def load_features_dict(
         If True, will save the features dict if it needs to be created.
     metric : str, optional
         Can be 'mean' or 'median'. If metric is not None, the repetitions will
-        be transformed with a moving average or moving median (n=10, step=1 by default)
+        be transformed with a moving average or moving median
+        (with n=10, step=1 by default).
     days_of_train : bool, optional
         If True, features will be expressed in number of days elapsed
         since the training started (broke ?)
@@ -41,15 +44,17 @@ def load_features_dict(
     features_dict_path = op.join(
         path_to_data, "processed", f"{subject}_{level}_{setup}_repfeats_{metric}.pkl"
     )
-    if not (op.isfile(features_dict_path)):
+    if not op.isfile(features_dict_path):
 
         level_variables_path = op.join(
-            path_to_data, "processed", f"{subject}_{level}_allvars_{setup}.pkl"
+            path_to_data,
+            "processed",
+            f"{subject}_{level}_levelwise_variables_{setup}.pkl",
         )
         with open(level_variables_path, "rb") as f:
-            allvars = pickle.load(f)
-        features_dict = aggregate_vars(
-            allvars,
+            levelwise_variables = pickle.load(f)
+        features_dict = compute_features(
+            levelwise_variables,
             metric=metric,
             rel_speed=True,
             health_lost=True,
@@ -67,8 +72,8 @@ def load_features_dict(
     return features_dict
 
 
-def aggregate_vars(
-    allvars,
+def compute_features(
+    levelwise_variables,
     metric=None,
     days_of_train=True,
     rel_speed=False,
@@ -78,13 +83,39 @@ def aggregate_vars(
     completion_perc=False,
     completion_speed=False,
 ):
-    """
-    Aggregate variables into repetition-level features and store them in a dict
+    """Short summary.
+
+    Parameters
+    ----------
+    levelwise_variables : type
+        Description of parameter `levelwise_variables`.
+    metric : type
+        Description of parameter `metric`.
+    days_of_train : type
+        Description of parameter `days_of_train`.
+    rel_speed : type
+        Description of parameter `rel_speed`.
+    health_lost : type
+        Description of parameter `health_lost`.
+    max_score : type
+        Description of parameter `max_score`.
+    completion_prob : type
+        Description of parameter `completion_prob`.
+    completion_perc : type
+        Description of parameter `completion_perc`.
+    completion_speed : type
+        Description of parameter `completion_speed`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
     """
 
     features_dict = {}
-    start_of_training = allvars[0]["timestamp"]
-    for repvars in allvars:
+    start_of_training = levelwise_variables[0]["timestamp"]
+    for repvars in levelwise_variables:
         if days_of_train:
             features_dict["Days of training"] = compute_days_of_train(
                 repvars, timestamp
@@ -92,26 +123,30 @@ def aggregate_vars(
             print("Days of training computed")
         else:
             features_dict["Passage order"] = [
-                x for x in range(len(allvars["filename"]))
+                x for x in range(len(levelwise_variables["filename"]))
             ]
             print("Passage order computed")
         if rel_speed:
-            features_dict["Relative speed"] = compute_rel_speed(allvars)
+            features_dict["Relative speed"] = compute_rel_speed(levelwise_variables)
             print("Relative speed computed")
         if health_lost:
-            features_dict["Health loss"] = compute_health_lost(allvars)
+            features_dict["Health loss"] = compute_health_lost(levelwise_variables)
             print("Health loss computed")
         if max_score:
-            features_dict["Max score"] = compute_max_score(allvars)
+            features_dict["Max score"] = compute_max_score(levelwise_variables)
             print("Max score computed")
         if completion_prob:
-            features_dict["Completion prob"] = compute_completed(allvars)
+            features_dict["Completion prob"] = compute_completed(levelwise_variables)
             print("Completion probability computed")
         if completion_perc:
-            features_dict["Percent complete"] = compute_completed_perc(allvars)
+            features_dict["Percent complete"] = compute_completed_perc(
+                levelwise_variables
+            )
             print("Completion percentage computed")
         if completion_speed:
-            features_dict["Completion speed"] = compute_time2complete(allvars)
+            features_dict["Completion speed"] = compute_time2complete(
+                levelwise_variables
+            )
             print("Completion speed computed")
 
         if metric != None:
@@ -127,7 +162,7 @@ def compute_days_of_train(repvars, timestamp):
     Translate timecodes into days-past-start-training. Starts at 1 instead of 0 (for exp/inverse fit)
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
@@ -135,7 +170,7 @@ def compute_days_of_train(repvars, timestamp):
     """
     days_of_training = []
     first_day = []
-    for timestamp in allvars["timestamp"]:
+    for timestamp in levelwise_variables["timestamp"]:
         current_day = datetime.fromtimestamp(int(timestamp))
         if days_of_training == []:
             first_day = current_day
@@ -161,38 +196,38 @@ def compute_max_score(repvars):
     return max_score
 
 
-def compute_health_lost(allvars):
+def compute_health_lost(levelwise_variables):
     """
     Total amount of health lost in each game.
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
     health_lost = list with one element per repetition
     """
     health_lost = []
-    for i in range(len(allvars["health"])):
+    for i in range(len(levelwise_variables["health"])):
         health_lost.append(
-            sum([x for x in np.diff(allvars["health"][i], n=1) if x < 0])
+            sum([x for x in np.diff(levelwise_variables["health"][i], n=1) if x < 0])
         )
     return health_lost
 
 
-def compute_completed(allvars):
+def compute_completed(levelwise_variables):
     """
     Here we use "ended the level without losing a life" as a proxy for completed levels
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 listprints = frames
 
     Outputs :
     completed = list with one element per repetition (0 for repetition failed, 1 for repetition completed)
     """
     completed = []
-    for repetition_lives in allvars["lives"]:
+    for repetition_lives in levelwise_variables["lives"]:
         lives_lost = sum([x for x in np.diff(repetition_lives, n=1) if x < 0])
         if lives_lost == 0:
             completed.append(1)
@@ -201,19 +236,19 @@ def compute_completed(allvars):
     return completed
 
 
-def compute_completed_perc(allvars):
+def compute_completed_perc(levelwise_variables):
     """
     Here we use "reach somewhere around the end of the level" as a proxy for complete
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
     completed = list with one element per repetition (min 0 max 100)
     """
     # Clean the X_player variable
-    X_player = fix_position_resets(allvars["X_player"])
+    X_player = fix_position_resets(levelwise_variables["X_player"])
 
     # Find max value of X_player across all repetitions (that means that we assume that the level was completed at least once in our data)
     max_X = []
@@ -233,21 +268,23 @@ def compute_completed_perc(allvars):
     return completed_perc
 
 
-def compute_time2complete(allvars):
+def compute_time2complete(levelwise_variables):
     """
     Number of frames elapsed until the last position in the level, only for repetitions that are completed.
     Failed repetitions are replaced by the average value of completed repetitions.
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
     time2complete = list with one element per repetition (number of frames until end)
 
     """
-    time2pos_lists = compute_time2pos(fix_position_resets(allvars["X_player"]))
-    completed = compute_completed(allvars)
+    time2pos_lists = compute_time2pos(
+        fix_position_resets(levelwise_variables["X_player"])
+    )
+    completed = compute_completed(levelwise_variables)
     time2complete = []
     for i, r in enumerate(completed):
         if r:
@@ -260,19 +297,19 @@ def compute_time2complete(allvars):
     return time2complete
 
 
-def compute_rel_speed(allvars):
+def compute_rel_speed(levelwise_variables):
     """
     Compute the average (per repetition) relative speed based on the distribution of time2pos, i.e. the number
     of frames elapsed until a position is reached.
 
     Inputs :
-    allvars = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
     rel_speed = list with one element per repetition
     """
-    X_player_lists = fix_position_resets(allvars["X_player"])
+    X_player_lists = fix_position_resets(levelwise_variables["X_player"])
     time2pos_lists = compute_time2pos(X_player_lists)
     distrib_t2p = distributions_t2p(time2pos_lists)
     rel_speed = []
