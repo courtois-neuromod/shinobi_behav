@@ -7,6 +7,12 @@ fMRI analysis (session- and subject-level activation maps) can be found in [this
 
 Installation steps :
 
+Install pre-requisites :
+sudo apt-get install datalad
+
+Download repository :
+git clone git@github.com:courtois-neuromod/shinobi_behav
+
 Sanity checks :
 - Deterministic behaviour of the emulator
 - Learning curves

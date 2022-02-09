@@ -20,4 +20,3 @@ load_confounds
 seaborn
 statsmodels
 tqdm
-pickle
