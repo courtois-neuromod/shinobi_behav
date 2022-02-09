@@ -149,8 +149,10 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
 
     Returns
     -------
-    level_variables : dict
-        A dict containing all the variables extracted from the log file
+    levelwise_variables : list
+        A list of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
     """
     if setup == "home":
         subject_template = op.join(path_to_data, "shinobi_training", "{}")
@@ -165,7 +167,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
 
     names_fakereps = []
     names_emptyfiles = []
-    level_variables = []
+    levelwise_variables = []
     sessions = [
         sesname
         for sesname in os.listdir(subject_template.format(subject))
@@ -185,11 +187,11 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
 
                 if remove_fake_reps:
                     if compute_max_score(repetition_variables) > 200:
-                        level_variables.append(repetition_variables)
+                        levelwise_variables.append(repetition_variables)
                     else:
                         names_fakereps.append(fpath)
                 else:
-                    level_variables.append(repetition_variables)
+                    levelwise_variables.append(repetition_variables)
             except RuntimeError as error:
                 print(f"Failed extraction for {file} because of RuntimeError : ")
                 print(error)
@@ -198,7 +200,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
     if remove_fake_reps:
         print(f"Removed a total of {len(names_fakereps)} fake reps (max score <= 200)")
     print(f"Found a total of {len(names_emptyfiles)} empty files")
-    return level_variables, names_fakereps, names_emptyfiles
+    return levelwise_variables, names_fakereps, names_emptyfiles
 
 
 def extract_and_save_corrupted_files():
