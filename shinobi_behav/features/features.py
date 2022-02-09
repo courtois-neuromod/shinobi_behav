@@ -5,6 +5,8 @@ from datetime import datetime
 from math import ceil
 from scipy.stats import percentileofscore
 import scipy.signal as signal
+import shinobi_behav
+from shinobi_behav.utils import filter_run, moving_descriptive
 
 
 def load_features_dict(
@@ -313,47 +315,54 @@ def compute_completed_perc(levelwise_variables):
         completed_perc.append(curr_X / end_of_level * 100)
     return completed_perc
 
+def compute_time2complete(levelwise_variables, replace_nans=True):
+    """Number of frames elapsed until the last position in the level, only for
+    repetitions that are completed. Failed repetitions are replaced by the
+    average value of completed repetitions. TODO : rewrite without using time2pos
 
-def compute_time2complete(levelwise_variables):
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
+
+    Returns
+    -------
+    type
+        List of times to complete each repetition.
+
     """
-    Number of frames elapsed until the last position in the level, only for repetitions that are completed.
-    Failed repetitions are replaced by the average value of completed repetitions.
-
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains List of lists, with
-    level1 lists = reps and level2 lists = frames
-
-    Outputs :
-    time2complete = list with one element per repetition (number of frames until end)
-
-    """
-    time2pos_lists = compute_time2pos(
-        fix_position_resets(levelwise_variables["X_player"])
-    )
     completed = compute_completed(levelwise_variables)
     time2complete = []
-    for i, r in enumerate(completed):
-        if r:
-            time2complete.append(time2pos_lists[i][-1])
+    for idx, rep_complete in enumerate(completed):
+        if rep_complete:
+            time2complete.append(np.ceil(len(levelwise_variables[idx]["score"])/shinobi_behav.GAME_FS))
         else:
             time2complete.append(np.nan)
-    time2complete = [
-        np.nanmean(time2complete) if np.isnan(x) else x for x in time2complete
-    ]
+    if replace_nans:
+        time2complete = [
+            np.nanmean(time2complete) if np.isnan(x) else x for x in time2complete
+        ]
     return time2complete
 
-
 def compute_rel_speed(levelwise_variables):
-    """
-    Compute the average (per repetition) relative speed based on the distribution of time2pos, i.e. the number
-    of frames elapsed until a position is reached.
+    """Compute the average (per repetition) relative speed based on the
+    distribution of time2pos, i.e. the number of frames elapsed until a
+    position is reached.
 
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains List of lists, with
-    level1 lists = reps and level2 lists = frames
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
 
-    Outputs :
-    rel_speed = list with one element per repetition
+    Returns
+    -------
+    list
+        List of the average relative speed of each repetition.
+
     """
     X_player_list = fix_position_resets(levelwise_variables)
     time2pos_list = compute_time2pos(X_player_list)
@@ -509,7 +518,7 @@ def compute_time2pos(X_player_list):
     Returns
     -------
     type
-        List of list of cleaned time2pos values, one list for each repetition
+        List of list of cleaned time2pos values, one list for each repetition.
 
     """
     time2pos_list = []
@@ -520,10 +529,19 @@ def compute_time2pos(X_player_list):
         time2pos_list.append(time2pos_clean)
     return time2pos_list
 
-
 def distributions_t2p(time2pos_list):
-    """
-    Create distribution of the variable for each value
+    """Creates a distribution of time2pos values for each possible position.
+
+    Parameters
+    ----------
+    time2pos_list : list
+        List of list of cleaned time2pos values, one list for each repetition.
+
+    Returns
+    -------
+    list
+        List of distributions of time2pos.
+
     """
     distrib_t2p = []
     for i in range(max([len(time2pos) for time2pos in time2pos_list])):
@@ -538,9 +556,22 @@ def distributions_t2p(time2pos_list):
 
 
 def compare_to_distrib(distrib_t2p, time2pos_repetition):
-    """
-    Compare an individual run to the distribution of all runs and get percentile for each pos.
-    i.e. compute relative time_to_position
+    """Compare an individual repetition to the distribution of all repetitions and get
+    percentile for each pos. i.e. compute relative time-to-position.
+
+    Parameters
+    ----------
+    distrib_t2p : list
+        List of distributions of time2pos..
+    time2pos_repetition : list
+        List of time2pos values at every position, after sanitize and interp.
+
+    Returns
+    -------
+    list
+        The percentile rank of time2pos values of this repetition,
+        for each position.
+
     """
     pos_percentile = []
     for i, pos in enumerate(time2pos_repetition):
@@ -593,22 +624,54 @@ def compute_framewise_aps(levelwise_variables, actions, FS=60):
 
 
 # utils
-def filter_run(run, order=3, cutoff=0.005):
-    """
-    Filter the relative time_to_position for visualization and computation of the derivative
+def filter_run(repetition_variable, order=3, cutoff=0.005):
+    """Filter a vector in the time dimension. Can be used on the relative
+    time_to_position for visualization and computation of the derivative.
+
+    Parameters
+    ----------
+    repetition_variable : List
+        List (vector) of values of a variable at each frame of a repetition.
+    order : int
+        Filter order.
+    cutoff : float
+        Filter cutoff.
+
+    Returns
+    -------
+    list
+        Filtered vector.
+
     """
     b, a = signal.butter(order, cutoff)
-    run_filtered = signal.filtfilt(b, a, run)
-    return run_filtered
+    variable_filtered = signal.filtfilt(b, a, repetition_variable)
+    return variable_filtered
 
 
-def moving_descriptive(x, N=3, metric="mean"):
-    x = np.array(x)
-    idx = np.arange(N) + np.arange(len(x) - N + 1)[:, None]
+def moving_descriptive(perf_measure, win_size=3, metric="mean"):
+    """Run a moving window across repetitions and compute a descriptive metrics.
+
+    Parameters
+    ----------
+    perf_measure : list
+        List of the performance measure values for each repetition.
+    win_size : int
+        Size (in number of samples) of the moving window.
+    metric : str
+        Metric to apply. Can be "mean", "median" or "std".
+
+    Returns
+    -------
+    list
+        List of values averaged across the moving windows.
+
+    """
+    perf_measure = np.array(perf_measure)
+    idx = np.arange(win_size) + np.arange(len(perf_measure) - win_size + 1)[:, None]
     if metric == "mean":
-        out = list(np.mean(x[idx], axis=1))
+        out = list(np.mean(perf_measure[idx], axis=1))
     if metric == "median":
-        out = list(np.median(x[idx], axis=1))
+        out = list(np.median(perf_measure[idx], axis=1))
     if metric == "std":
-        out = list(np.std(x[idx], axis=1))
+        out = list(np.std(perf_measure[idx], axis=1))
     return out
