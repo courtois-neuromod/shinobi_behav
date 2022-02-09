@@ -1,8 +1,7 @@
 # Data folder
-data/
+/data
 
-# Params file
-src/params.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
