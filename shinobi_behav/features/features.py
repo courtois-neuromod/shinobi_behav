@@ -52,7 +52,7 @@ def load_features_dict(
             f"{subject}_{level}_levelwise_variables_{setup}.pkl",
         )
         with open(level_variables_path, "rb") as f:
-            levelwise_variables = pickle.load(f)
+            levelwise_variables, _, _ = pickle.load(f)
         features_dict = compute_features(
             levelwise_variables,
             metric=metric,
@@ -73,7 +73,7 @@ def load_features_dict(
 
 
 def compute_features(
-    levelwise_variables,
+    list_variables,
     metric=None,
     days_of_train=True,
     rel_speed=False,
@@ -83,151 +83,185 @@ def compute_features(
     completion_perc=False,
     completion_speed=False,
 ):
-    """Short summary.
+    """Computes performance metrics based on the repetition_variables dict.
+    Some of these metrics, like "rel speed", require that each repetition is
+    compared against the distribution of all other repetitions.
 
     Parameters
     ----------
-    levelwise_variables : type
-        Description of parameter `levelwise_variables`.
-    metric : type
-        Description of parameter `metric`.
-    days_of_train : type
-        Description of parameter `days_of_train`.
-    rel_speed : type
-        Description of parameter `rel_speed`.
-    health_lost : type
-        Description of parameter `health_lost`.
-    max_score : type
-        Description of parameter `max_score`.
-    completion_prob : type
-        Description of parameter `completion_prob`.
-    completion_perc : type
-        Description of parameter `completion_perc`.
-    completion_speed : type
-        Description of parameter `completion_speed`.
+    list_variables : list
+        Any list of repetition_variables dicts.
+    metric : str
+        If not none, will apply a summary metrics in a moving window
+        (with n=10, step=1 by default). Can be "mean" or "median".
+    days_of_train : bool
+        If True, will index the datapoints by the number of days elapsed since
+        the first game of the dataset was played. If False, the data are ordered
+        by passage order.
+    rel_speed : bool
+        If True, computes the average relative speed across the repetitions.
+        See features.compute_rel_speed for more information.
+    health_lost : bool
+        If True, computes the total amount of health lost during the repetitions.
+    max_score : bool
+        If True, computes the maximum score reached in the repetitions.
+    completion_prob : bool
+        If True, computes the probability of a repetition to be completed, given
+        the moving window. Must be used with the metric argument set to something
+        else than None, or else it will only contain binary values (0 or 1) for
+        each repetition.
+    completion_perc : bool
+        If True, computes the proportion of the level that was completed during
+        the repetitions. Expressed from 0 to 1.
+    completion_speed : bool
+        If True, computes the time (number of frames) elapsed until the
+        completion of the repetition.
 
     Returns
     -------
-    type
-        Description of returned object.
+    dict
+        Dictionnary containing one entry per performance metrics, each containing
+        List of length = n_repetitions.
 
     """
 
     features_dict = {}
-    start_of_training = levelwise_variables[0]["timestamp"]
-    for repvars in levelwise_variables:
-        if days_of_train:
-            features_dict["Days of training"] = compute_days_of_train(
-                repvars, timestamp
-            )
-            print("Days of training computed")
-        else:
-            features_dict["Passage order"] = [
-                x for x in range(len(levelwise_variables["filename"]))
-            ]
-            print("Passage order computed")
-        if rel_speed:
-            features_dict["Relative speed"] = compute_rel_speed(levelwise_variables)
-            print("Relative speed computed")
-        if health_lost:
-            features_dict["Health loss"] = compute_health_lost(levelwise_variables)
-            print("Health loss computed")
-        if max_score:
-            features_dict["Max score"] = compute_max_score(levelwise_variables)
-            print("Max score computed")
-        if completion_prob:
-            features_dict["Completion prob"] = compute_completed(levelwise_variables)
+    # for repetition_variables in list_variables:
+    if days_of_train:
+        features_dict["Days of training"] = compute_days_of_train(list_variables)
+        print("Days of training computed")
+    else:
+        features_dict["Passage order"] = list(range(len(list_variables)))
+        print("Passage order computed")
+    if rel_speed:
+        features_dict["Relative speed"] = compute_rel_speed(list_variables)
+        print("Relative speed computed")
+    if health_lost:
+        features_dict["Health loss"] = compute_health_lost(list_variables)
+        print("Health loss computed")
+    if max_score:
+        features_dict["Max score"] = compute_max_score(list_variables)
+        print("Max score computed")
+    if completion_prob:
+        if metric is not None:
+            features_dict["Completion probability"] = compute_completed(list_variables)
             print("Completion probability computed")
-        if completion_perc:
-            features_dict["Percent complete"] = compute_completed_perc(
-                levelwise_variables
-            )
-            print("Completion percentage computed")
-        if completion_speed:
-            features_dict["Completion speed"] = compute_time2complete(
-                levelwise_variables
-            )
-            print("Completion speed computed")
+        else:
+            features_dict["Completion"] = compute_completed(list_variables)
+            print("Completion computed")
+    if completion_perc:
+        features_dict["Percent complete"] = compute_completed_perc(list_variables)
+        print("Completion percentage computed")
+    if completion_speed:
+        features_dict["Completion speed"] = compute_time2complete(list_variables)
+        print("Completion speed computed")
 
-        if metric != None:
-            for key in features_dict.keys():
-                features_dict[key] = moving_descriptive(
-                    features_dict[key], N=10, metric=metric
-                )
+    if metric is not None:
+        for key in features_dict.keys():
+            features_dict[key] = moving_descriptive(
+                features_dict[key], N=10, metric=metric
+            )
     return features_dict
 
 
-def compute_days_of_train(repvars, timestamp):
-    """
-    Translate timecodes into days-past-start-training. Starts at 1 instead of 0 (for exp/inverse fit)
+def compute_days_of_train(levelwise_variables):
+    """Translate timecodes into days-past-start-training.
+    Starts at 1 instead of 0 (for exp/inverse fit).
 
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = frames
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
 
-    Outputs :
-    days_of_training = list with one element per repetition
+    Returns
+    -------
+    list
+        List of datetime objects indicating the number of days elapsed since
+        the training's beginning, for each repetition.
+
     """
     days_of_training = []
-    first_day = []
-    for timestamp in levelwise_variables["timestamp"]:
+    timestamps = []
+    for repetition_dict in levelwise_variables:
+        timestamps.append(repetition_dict["timestamp"])
+    first_day = datetime.fromtimestamp(np.min(timestamps))
+
+    for timestamp in timestamps:
         current_day = datetime.fromtimestamp(int(timestamp))
-        if days_of_training == []:
-            first_day = current_day
         d_training = current_day - first_day
         days_of_training.append(d_training.days + 1)
     return days_of_training
 
 
-def compute_max_score(repvars):
-    """Get the maximum score of a repetition.
+def compute_max_score(levelwise_variables):
+    """Gets the maximum score attained at each repetition.
 
     Parameters
     ----------
-    repvars : dict
-        A dict containing all the variables extracted from the log file
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
 
     Returns
     -------
-    max_score : int
-        The maximum score reached across the repetition
+    list
+        List of maximum score values.
+
     """
-    max_score = max(repvars["score"])
-    return max_score
+    max_scores = []
+    for repetition_dict in levelwise_variables:
+        max_scores.append(max(repetition_dict["score"]))
+    return max_scores
 
 
 def compute_health_lost(levelwise_variables):
-    """
-    Total amount of health lost in each game.
+    """Total amount of health lost in each repetition.
 
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = frames
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
 
-    Outputs :
-    health_lost = list with one element per repetition
+    Returns
+    -------
+    list
+        List of the total amount of health lost during each repetition.
+
     """
-    health_lost = []
-    for i in range(len(levelwise_variables["health"])):
-        health_lost.append(
-            sum([x for x in np.diff(levelwise_variables["health"][i], n=1) if x < 0])
-        )
-    return health_lost
+    total_health_lost = []
+    for repetition_dict in levelwise_variables:
+        health_change = np.diff(repetition_dict["health"], n=1)
+        total_health_lost.append(sum([x for x in health_change if x < 0]))
+    return total_health_lost
 
 
 def compute_completed(levelwise_variables):
     """
-    Here we use "ended the level without losing a life" as a proxy for completed levels
+    Check if the player completed the repetition or not.
+    Here we use "ended the repetition without losing a life" as indicative of a
+    completed level.
 
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 listprints = frames
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
 
-    Outputs :
-    completed = list with one element per repetition (0 for repetition failed, 1 for repetition completed)
+    Returns
+    -------
+    list
+        List of 0 and 1, indicative of a repetition completed (1) or not (0).
+
     """
     completed = []
-    for repetition_lives in levelwise_variables["lives"]:
+    for repetition_dict in levelwise_variables:
+        repetition_lives = repetition_dict["lives"]
         lives_lost = sum([x for x in np.diff(repetition_lives, n=1) if x < 0])
         if lives_lost == 0:
             completed.append(1)
@@ -237,31 +271,43 @@ def compute_completed(levelwise_variables):
 
 
 def compute_completed_perc(levelwise_variables):
+    """Computes the percentage of the level that was actually completed during
+    each repetition. A repetition in which the player reached a position located
+    at 70% of the maximum position in a level will have a value of 70. We use
+    "reach somewhere around the end of the level" as a proxy for complete,
+    because boss fights introduce some jitter around the farthest position one
+    can reach.
+
+    Parameters
+    ----------
+    levelwise_variables : list of dicts
+        List of dicts containing all the variables extracted from the log
+        file of all the repetitions of a subject in a specific level, on a
+        specific setup.
+
+    Returns
+    -------
+    list
+        List of the completion percentages for each repetition.
+
     """
-    Here we use "reach somewhere around the end of the level" as a proxy for complete
 
-    Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
-    level1 lists = reps and level2 lists = frames
+    X_player_list = fix_position_resets(levelwise_variables)
+    # Find max value of X_player across all repetitions (that means that we
+    # assume that the level was completed at least once in our data)
+    max_X_list = []
+    for X_player in X_player_list:
+        max_X_list.append(np.max(X_player))
 
-    Outputs :
-    completed = list with one element per repetition (min 0 max 100)
-    """
-    # Clean the X_player variable
-    X_player = fix_position_resets(levelwise_variables["X_player"])
+    # We assume that the level is completed at 100% when the player reaches
+    # end_of_level - 100, because there is some variance due to boss fights
+    end_of_level = np.max(max_X_list) - 100
 
-    # Find max value of X_player across all repetitions (that means that we assume that the level was completed at least once in our data)
-    max_X = []
-    for rep in X_player:
-        max_X.append(np.max(rep))
-
-    end_of_level = (
-        np.max(max_X) - 100
-    )  # lets assume that the level is completed when the player reaches end_of_level - 100, because there is some variance here due to the boss fights
-
+    # Now store the proportion of the level completed
+    # by comparing the end position against the max position and expressing it
+    # as a percent.
     completed_perc = []
-    # Now store the end position of each repetition and write it as percent of end_of_level
-    for curr_X in max_X:
+    for curr_X in max_X_list:
         if curr_X > end_of_level:
             curr_X = end_of_level
         completed_perc.append(curr_X / end_of_level * 100)
@@ -274,7 +320,7 @@ def compute_time2complete(levelwise_variables):
     Failed repetitions are replaced by the average value of completed repetitions.
 
     Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains List of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
@@ -303,85 +349,118 @@ def compute_rel_speed(levelwise_variables):
     of frames elapsed until a position is reached.
 
     Inputs :
-    levelwise_variables = dict with one entry per variable. Each entry contains a list of lists, with
+    levelwise_variables = dict with one entry per variable. Each entry contains List of lists, with
     level1 lists = reps and level2 lists = frames
 
     Outputs :
     rel_speed = list with one element per repetition
     """
-    X_player_lists = fix_position_resets(levelwise_variables["X_player"])
-    time2pos_lists = compute_time2pos(X_player_lists)
-    distrib_t2p = distributions_t2p(time2pos_lists)
+    X_player_list = fix_position_resets(levelwise_variables)
+    time2pos_list = compute_time2pos(X_player_list)
+    distrib_t2p = distributions_t2p(time2pos_list)
     rel_speed = []
-    for i, run in enumerate(time2pos_lists):
+    for i, run in enumerate(time2pos_list):
         rel_speed.append(np.mean(compare_to_distrib(distrib_t2p, run)))
     return rel_speed
 
 
 # relative speed prerequisites
-def fix_position_resets(X_player_lists):
-    """
-    Sometimes X_player resets to a previous value, but it's truly a new position.
-    This fixes it and makes sure that X_player is continuous
+def fix_position_resets(levelwise_variables):
+    """Sometimes X_player resets to 0 but the player's position should keep
+    increasing.
+    This fixes it and makes sure that X_player is continuous. If not, the
+    values after the jump are corrected.
 
-    X_player_lists : A list of X_player arrays (one for each repetition)
+    Parameters
+    ----------
+    X_player : list
+        List of raw positions at each timeframe from one repetition.
 
-    fixed_X_player_lists : same as X_player_lists
-    """
-    fixed_X_player_lists = []
-    for X_player in X_player_lists:
-        fixed_X_player_list = []
-        fix = 0
-        for i in range(1, len(X_player) - 1):
-            if X_player[i - 1] - X_player[i] > 100:
-                fix += X_player[i - 1] - X_player[i]
-            fixed_X_player_list.append(X_player[i] + fix)
-        fixed_X_player_list = fixed_X_player_list
-        if fixed_X_player_list == []:
-            fixed_X_player_list.append(
-                32
-            )  # in case the list becomes empty add 32 so it is removed
-        fixed_X_player_lists.append(fixed_X_player_list)
-    return fixed_X_player_lists
+    Returns
+    -------
+    list
+        List of lists of fixed (continuous) positions. One per repetition.
 
-
-def time2pos(run):
     """
-    Compute the number of frames to reach each position (i.e. value of X_player) in one singular run
-    """
-    uniques = list(set(run))  # get unique values in list
-    time2pos_run = []
-    for val in uniques:
-        time2pos_run.append(run.index(val))  # find first occurence of val
-    return time2pos_run, uniques
+    X_player_list = []
+    for repetition_dict in levelwise_variables:
+        fixed_X_player = []
+        raw_X_player = repetition_dict["X_player"]
+        fix = 0  # keeps trace of the shift
+        fixed_X_player.append(raw_X_player[0])  # add first frame
+        for i in range(1, len(raw_X_player) - 1):  # ignore first and last frames
+            if raw_X_player[i - 1] - raw_X_player[i] > 100:
+                fix += raw_X_player[i - 1] - raw_X_player[i]
+            fixed_X_player.append(raw_X_player[i] + fix)
+        X_player_list.append(fixed_X_player)
+    return X_player_list
 
 
-def interpolate_missing_pos(time2pos_run, uniques):
+def time2pos(fixed_X_player):
+    """Compute the number of frames to reach each position (i.e. each value of
+    X_player) in one repetition.
+
+    Parameters
+    ----------
+    fixed_X_player : list
+        List of fixed positions at each timeframe from one repetition.
+
+    Returns
+    -------
+    time2pos_repetition : list
+        List of the number of frames elapsed to reach each position.
+    unique_positions : list
+        List of unique position values.
     """
-    Some pos are missing, interpolate them by averaging the two nearest pos
+    unique_positions = list(set(fixed_X_player))  # get unique values in list
+    time2pos_repetition = []
+    for val in unique_positions:
+        time2pos_repetition.append(
+            fixed_X_player.index(val)
+        )  # find first occurence of val
+    return time2pos_repetition, unique_positions
+
+
+def interpolate_missing_pos(time2pos_repetition, unique_positions):
+    """Some position values are missing because the position variable can change from more
+    than 1 between two successive frames. We interpolate them by averaging the
+    two nearest positions.
+
+    Parameters
+    ----------
+    time2pos_repetition : list
+        List of the raw number of frames elapsed to reach each position.
+    unique_positions : type
+        List of unique position values.
+
+    Returns
+    -------
+    type
+        List of time2pos values for every possible position between starting
+        and end points.
+
     """
-    try:
-        start = min(uniques)
-        stop = max(uniques)
-    except:
-        start = 0
-        stop = 0
+    start = min(unique_positions)
+    stop = max(unique_positions)
+
     time2pos_full = []
     for pos in range(start, stop):
-        if pos in uniques:
+        if pos in unique_positions:
             time2pos_full.append(
-                time2pos_run[uniques.index(pos)]
-            )  # append the value if pos in uniques
+                time2pos_repetition[unique_positions.index(pos)]
+            )  # append the value if pos in unique_positions
             last_frame = pos
         else:
             next_found = False
             next_frame = 1
-            while next_found == False:
-                if pos + next_frame in uniques:
+            while next_found is False:
+                if pos + next_frame in unique_positions:
                     interp_val = ceil(
                         (
-                            time2pos_run[uniques.index(last_frame)]
-                            + time2pos_run[uniques.index(pos + next_frame)]
+                            time2pos_repetition[unique_positions.index(last_frame)]
+                            + time2pos_repetition[
+                                unique_positions.index(pos + next_frame)
+                            ]
                         )
                         / 2
                     )
@@ -393,46 +472,63 @@ def interpolate_missing_pos(time2pos_run, uniques):
 
 
 def sanitize_time2pos(time2pos_full):
+    """The player sometimes goes back in the level, and a pos previously reached
+    but unregistered is reached again, registered this time. Replace these by
+    the next position reached. TODO : assert if continuous at the end,
+    if not, repeat.
+
+    Parameters
+    ----------
+    time2pos_full : List
+        List of time2pos values for every possible position between starting
+        and end points.
+
+    Returns
+    -------
+    list
+        List of time2pos values at every position, without jump-backs.
+
     """
-    The player sometimes goes back in the level, and a pos previously reached
-    but unregistered is reached again, registered this time.
-    Get rid of these and cross your fingers that its not 2 in a row
-    (should not happen if sfreq is high enough that the player cannot
-    jump more than 2 pos, which seems to be the case)
-    """
-    for i, pos in enumerate(time2pos_full):
-        if pos < time2pos_full[i - 1]:
-            time2pos_full[i - 1] = pos
+    for i, pos in enumerate(time2pos_full[:-1]):
+        if pos > time2pos_full[i + 1]:
+            pos = time2pos_full[i + 1]
     time2pos_clean = time2pos_full
     return time2pos_clean
 
 
-def compute_time2pos(X_player_lists):
-    """
-    Transforms the list of positions (X_player variable) can be found in
-    into the number of frames (time) to reach each pos.
+def compute_time2pos(X_player_list):
+    """Transforms the list of positions (X_player variable)
+    into the number of frames (time) to reach each pos, and apply full cleaning
 
-    X_player_lists must first be corrected by fix_position_resets.
+
+    Parameters
+    ----------
+    X_player_list : list
+        List of lists of fixed (continuous) positions. One per repetition.
+
+    Returns
+    -------
+    type
+        List of list of cleaned time2pos values, one list for each repetition
+
     """
-    time2pos_lists = []
-    for run in X_player_lists:
-        time2pos_run, uniques = time2pos(run)
-        time2pos_full = interpolate_missing_pos(time2pos_run, uniques)
+    time2pos_list = []
+    for X_player in X_player_list:
+        time2pos_repetition, unique_positions = time2pos(X_player)
+        time2pos_full = interpolate_missing_pos(time2pos_repetition, unique_positions)
         time2pos_clean = sanitize_time2pos(time2pos_full)
-        time2pos_lists.append(
-            time2pos_clean[:-2]
-        )  # no idea why but the last 2 values are 0 <<---- CHECK WHY
-    return time2pos_lists
+        time2pos_list.append(time2pos_clean)
+    return time2pos_list
 
 
-def distributions_t2p(time2pos_lists):
+def distributions_t2p(time2pos_list):
     """
     Create distribution of the variable for each value
     """
     distrib_t2p = []
-    for i in range(max([len(time2pos) for time2pos in time2pos_lists])):
+    for i in range(max([len(time2pos) for time2pos in time2pos_list])):
         pos_distrib = []
-        for run in time2pos_lists:
+        for run in time2pos_list:
             try:
                 pos_distrib.append(run[i])
             except:
@@ -441,25 +537,25 @@ def distributions_t2p(time2pos_lists):
     return distrib_t2p
 
 
-def compare_to_distrib(distrib_t2p, time2pos_run):
+def compare_to_distrib(distrib_t2p, time2pos_repetition):
     """
     Compare an individual run to the distribution of all runs and get percentile for each pos.
     i.e. compute relative time_to_position
     """
     pos_percentile = []
-    for i, pos in enumerate(time2pos_run):
+    for i, pos in enumerate(time2pos_repetition):
         pos_percentile.append(percentileofscore(distrib_t2p[i], pos))
     return pos_percentile
 
 
 # aps computation
-def compute_framewise_aps(repvars, actions, FS=60):
+def compute_framewise_aps(levelwise_variables, actions, FS=60):
     """Generates an array containing .
 
     Parameters
     ----------
-    repvars : type
-        Description of parameter `repvars`.
+    levelwise_variables : type
+        Description of parameter `levelwise_variables`.
     actions : type
         Description of parameter `actions`.
     FS : type
@@ -474,7 +570,7 @@ def compute_framewise_aps(repvars, actions, FS=60):
     # generate events for each of them
     action_mat = []
     for act in actions:
-        var = repvars[act]
+        var = levelwise_variables[act]
         var_bin = [int(val) for val in var]
         diffs = list(np.diff(var_bin, n=1))
         absdiffs = [abs(x) for x in diffs]
