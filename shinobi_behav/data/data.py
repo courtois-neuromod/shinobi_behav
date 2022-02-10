@@ -36,10 +36,6 @@ def extract_variables(filepath, setup):
 
     if setup == "home":
         level = filepath[-22]
-        if level == "4":
-            level = level + "-1"
-        else:
-            level = level + "-0"
         with open(filepath.replace(".bk2", ".json")) as json_file:
             metadata = json.load(json_file)
             timestamp = int(metadata["LevelStartTimestamp"])
@@ -201,33 +197,3 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
         print(f"Removed a total of {len(names_fakereps)} fake reps (max score <= 200)")
     print(f"Found a total of {len(names_emptyfiles)} empty files")
     return levelwise_variables, names_fakereps, names_emptyfiles
-
-
-def extract_and_save_corrupted_files():
-    """Reads the datafiles from data/processed and store lists of corrupted files.
-
-    """
-    for setup in ["home", "scan"]:
-        emptyfiles = []
-        fakereps = []
-        for subj in shinobi_behav.SUBJECTS:
-            for level in ["1-0", "4-1", "5-0"]:
-                varfile_fpath = op.join(
-                    shinobi_behav.DATA_PATH,
-                    "processed",
-                    f"{subj}_{level}_levelwise_variables_{setup}.pkl",
-                )
-                with open(varfile_fpath, "rb") as f:
-                    _, names_fakereps, names_emptyfiles = pickle.load(f)
-                fakereps.append(names_fakereps)
-                emptyfiles.append(names_emptyfiles)
-        emptyfiles_fname = op.join(
-            shinobi_behav.DATA_PATH, "processed", f"{setup}_emptyfiles.txt"
-        )
-        fakereps_fname = op.join(
-            shinobi_behav.DATA_PATH, "processed", f"{setup}_fakereps.txt"
-        )
-        emptyfiles = [item for flist in emptyfiles for item in flist]
-        fakereps = [item for flist in fakereps for item in flist]
-        list_save(emptyfiles_fname, emptyfiles)
-        list_save(fakereps_fname, fakereps)
