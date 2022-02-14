@@ -4,15 +4,8 @@ from shinobi_behav.data.data import get_levelreps
 import os.path as op
 import pickle
 import os
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "-s", "--subject", default="01", type=str, help="Subject to process",
-)
-parser.add_argument("-l", "--level", default="1", type=str, help="Level to process")
-
-args = parser.parse_args()
+from shinobi_behav.parsing import parser
+from shinobi_behav.utils import pickle_save
 
 
 def main():
@@ -20,6 +13,7 @@ def main():
     dictionnaries, splitted by subject, setup and level, and sorted by date.
     This step is a prerequisite for features computation.
     """
+    args = parser.parse_args()
     path_to_data = shinobi_behav.DATA_PATH
     subj = "sub-" + args.subject
     level = args.level
@@ -43,8 +37,7 @@ def main():
                 path_to_data, subj, level, remove_fake_reps=True, setup=setup
             )
 
-            with open(level_variables_path, "wb") as f:
-                pickle.dump(level_variables, f)
+            pickle_save(level_variables_path, level_variables)
 
 
 if __name__ == "__main__":
