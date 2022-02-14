@@ -88,7 +88,7 @@ def init_variables_dict(filepath, level, timestamp, env, key_log):
     _, _, _, frame_variables = env.step(action_list)
 
     # Init all entries
-    for key in frame_variables.keys():
+    for key in frame_variables:
         repetition_variables[key] = []
     for action in env.buttons:
         repetition_variables[action] = []

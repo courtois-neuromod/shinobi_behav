@@ -157,7 +157,7 @@ def compute_features(
         print("Completion speed computed")
 
     if metric is not None:
-        for key in features_dict.keys():
+        for key in features_dict:
             features_dict[key] = moving_descriptive(
                 features_dict[key], N=10, metric=metric
             )
@@ -498,23 +498,4 @@ def compute_framewise_aps(levelwise_variables, actions, FS=60):
     return framewise_aps
 
 
-# utils
-def filter_run(run, order=3, cutoff=0.005):
-    """
-    Filter the relative time_to_position for visualization and computation of the derivative
-    """
-    b, a = signal.butter(order, cutoff)
-    run_filtered = signal.filtfilt(b, a, run)
-    return run_filtered
-
-
-def moving_descriptive(x, N=3, metric="mean"):
-    x = np.array(x)
-    idx = np.arange(N) + np.arange(len(x) - N + 1)[:, None]
-    if metric == "mean":
-        out = list(np.mean(x[idx], axis=1))
-    if metric == "median":
-        out = list(np.median(x[idx], axis=1))
-    if metric == "std":
-        out = list(np.std(x[idx], axis=1))
-    return out
+if __name__ == "__main__":

@@ -82,3 +82,10 @@ def moving_descriptive(perf_measure, win_size=3, metric="mean"):
     if metric == "std":
         out = list(np.std(perf_measure[idx], axis=1))
     return out
+
+def main():
+    # Unit test every function
+
+
+if __name__ == "__main__":
+    main()
