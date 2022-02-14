@@ -64,8 +64,7 @@ def load_features_dict(
             days_of_train=days_of_train,
         )
         if save == True:
-            with open(features_dict_path, "wb") as f:
-                pickle.dump(features_dict, f)
+            pickle_save(features_dict_path, features_dict)
     else:
         with open(features_dict_path, "rb") as f:
             features_dict = pickle.load(f)
