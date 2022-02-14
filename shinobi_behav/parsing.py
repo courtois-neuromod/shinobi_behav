@@ -7,5 +7,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-l", "--level", default="1", type=str, help="Level to process",
+    "-l",
+    "--level",
+    default="1",
+    type=str,
+    help="Level to process",
+    choices=["1", "4", "5"],
 )
