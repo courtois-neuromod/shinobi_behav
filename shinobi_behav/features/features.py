@@ -5,6 +5,7 @@ from datetime import datetime
 from math import ceil
 from scipy.stats import percentileofscore
 import scipy.signal as signal
+from shinobi_behav.utils import pickle_save
 
 
 def load_features_dict(
