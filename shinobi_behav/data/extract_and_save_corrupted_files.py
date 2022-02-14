@@ -1,7 +1,9 @@
 import os.path as op
+import logging
 import pickle
 import shinobi_behav
 from shinobi_behav.utils import list_save
+
 
 def main():
     """Reads the aggregated datafiles from data/processed and save text lists of
