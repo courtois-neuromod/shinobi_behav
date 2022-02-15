@@ -418,9 +418,9 @@ def get_time2pos(X_player_list):
                 frame_idx += 1
             time2pos.append(frame_idx + 1)  # +1 in case frame indices start at 1
 
-        assert (
-            len(time2pos) == max(positions[0]) - min(positions[0]) + 1
-        ), "Output length doesn't match positions range."
+        # assert (
+        #    len(time2pos) == max(positions[0]) - min(positions[0]) + 1
+        # ), "Output length doesn't match positions range."
         assert np.all(np.diff(time2pos) >= 0), "Output not monotonically increasing."
         time2pos_list.append(time2pos)
 
@@ -428,8 +428,20 @@ def get_time2pos(X_player_list):
 
 
 def distributions_t2p(time2pos_list):
-    """
-    Create distribution of the variable for each value
+    """Create distribution of time2pos values at each position, across all
+    repetitions of a single subject at a specific level.
+
+
+    Parameters
+    ----------
+    time2pos_list : list
+        Number of frames to reach each position, for each repetition.
+
+    Returns
+    -------
+    list
+        A distribution of the time2pos values for each position..
+
     """
     distrib_t2p = []
     for i in range(max([len(time2pos) for time2pos in time2pos_list])):
@@ -444,14 +456,58 @@ def distributions_t2p(time2pos_list):
 
 
 def compare_to_distrib(distrib_t2p, time2pos_repetition):
-    """
-    Compare an individual run to the distribution of all runs and get percentile for each pos.
-    i.e. compute relative time_to_position
+    """Compare an individual run to the distribution of all runs and get
+    Ranks time2pos values of a single repetition against the distribution of
+    values across all repetitions.
+    percentile for each pos. i.e. compute relative time_to_position
+
+
+    Parameters
+    ----------
+    distrib_t2p : type
+        Description of parameter `distrib_t2p`.
+    time2pos_repetition : type
+        Description of parameter `time2pos_repetition`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
     """
     pos_percentile = []
     for i, pos in enumerate(time2pos_repetition):
         pos_percentile.append(percentileofscore(distrib_t2p[i], pos))
     return pos_percentile
+
+
+def compute_framewise_t2p_rank(time2pos_list, distrib_t2p, X_player_list):
+    """Short summary.
+
+    Parameters
+    ----------
+    time2pos_list : type
+        Description of parameter `time2pos_list`.
+    distrib_t2p : type
+        Description of parameter `distrib_t2p`.
+    X_player_list : type
+        Description of parameter `X_player_list`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    framewise_t2p_list = []
+    for idx, time2pos in enumerate(time2pos_list):
+        pos_percentile = compare_to_distrib(distrib_t2p, time2pos)
+        framewise_t2p = []
+        for pos in X_player_list[idx]:
+            newpos = pos - min(X_player_list[idx])
+            framewise_t2p.append(pos_percentile[newpos])
+        framewise_t2p_list.append(framewise_t2p)
+    return framewise_t2p_list
 
 
 # aps computation
@@ -498,4 +554,4 @@ def compute_framewise_aps(levelwise_variables, actions, FS=60):
     return framewise_aps
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
