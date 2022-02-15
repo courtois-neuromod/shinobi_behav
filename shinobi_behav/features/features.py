@@ -418,9 +418,6 @@ def get_time2pos(X_player_list):
                 frame_idx += 1
             time2pos.append(frame_idx + 1)  # +1 in case frame indices start at 1
 
-        # assert (
-        #    len(time2pos) == max(positions[0]) - min(positions[0]) + 1
-        # ), "Output length doesn't match positions range."
         assert np.all(np.diff(time2pos) >= 0), "Output not monotonically increasing."
         time2pos_list.append(time2pos)
 
@@ -453,6 +450,54 @@ def distributions_t2p(time2pos_list):
                 pass
         distrib_t2p.append(np.array(pos_distrib))
     return distrib_t2p
+
+
+def distributions_p2t(X_player_list):
+    """Obtains the distribution, at each frame, of the positions reached by the
+    player at that frame across repetitions.
+
+    Parameters
+    ----------
+    X_player_list : list
+        List of (fixed) X_player position for every frame in each repetition.
+
+    Returns
+    -------
+    list of list
+        Distribution of player positions at a specific frame, across repetitions.
+
+    """
+    distrib_p2t = []
+    for i in range(max([len(x) for x in X_player_list])): # Find the longest rep
+        distrib_p2t_atframe = []
+        for X_player in X_player_list:
+            if i < len(X_player):
+                distrib_p2t_atframe.append(X_player[i])
+        distrib_p2t.append(distrib_p2t_atframe)
+    return distrib_p2t
+
+
+def get_ranked_p2t(distrib_p2t, X_player_repetition):
+    """Short summary.
+
+    Parameters
+    ----------
+    distrib_p2t : list of lists
+        Distribution of player positions at a specific frame, across repetitions.
+    X_player_repetition : list
+        List of positions at each frame, during one repetition.
+
+    Returns
+    -------
+    list
+        Rank of the current position at each frame against positions of all
+        other repetitions.
+
+    """
+    ranked_p2t = []
+    for idx, pos in enumerate(X_player_repetition):
+        ranked_p2t.append(percentileofscore(distrib_p2t[idx], pos))
+    return ranked_p2t
 
 
 def compare_to_distrib(distrib_t2p, time2pos_repetition):
@@ -503,6 +548,7 @@ def compute_framewise_t2p_rank(time2pos_list, distrib_t2p, X_player_list):
     for idx, time2pos in enumerate(time2pos_list):
         pos_percentile = compare_to_distrib(distrib_t2p, time2pos)
         framewise_t2p = []
+        max_pos_reached = 0
         for pos in X_player_list[idx]:
             newpos = pos - min(X_player_list[idx])
             framewise_t2p.append(pos_percentile[newpos])
