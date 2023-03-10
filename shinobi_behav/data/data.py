@@ -179,7 +179,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
             and level in filename
         ]
         if setup == "scan":
-            runlist = [x for x in sorted(allfiles).split("_")[3]]
+            runlist = [x.split("_")[3] for x in sorted(allfiles)]
             skip_first_steps = [True if runlist[i-1] != x else False for i, x in enumerate(runlist)]
         elif setup == "home":
             skip_first_step = [False for x in allfiles]
