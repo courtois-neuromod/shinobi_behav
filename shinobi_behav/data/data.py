@@ -183,7 +183,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
             fpath = file_template.format(subject, sess, file)
             try:
                 repetition_variables = extract_variables(fpath, setup=setup)
-                repetition_variables = get_variables_from_replay(fpath, skip_first_step=)
+                repetition_variables = get_variables_from_replay(fpath, skip_first_step=False)
 
                 if remove_fake_reps:
                     if compute_max_score(repetition_variables) > 200:
