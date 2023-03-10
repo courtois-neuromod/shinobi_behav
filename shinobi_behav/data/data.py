@@ -192,7 +192,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
                                                                  inttype=retro.data.Integrations.STABLE)
 
                 if remove_fake_reps:
-                    if compute_max_score(repetition_variables) > 200:
+                    if max(repetition_variables["score"]) > 200:
                         levelwise_variables.append(repetition_variables)
                     else:
                         names_fakereps.append(fpath)
