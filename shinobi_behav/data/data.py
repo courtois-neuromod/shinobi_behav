@@ -8,6 +8,7 @@ import retro
 from shinobi_behav.features.features import compute_max_score
 from shinobi_behav.utils import list_save
 from tqdm import tqdm
+from bids_loader.stimuli.game import get
 
 
 def extract_variables(filepath, setup):
@@ -176,10 +177,13 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
             if "bk2" in filename
         ]
         print("Processing : {} {}".format(subject, sess))
+        print(sorted(allfiles))
+        0/0
         for file in tqdm(sorted(allfiles)):
             fpath = file_template.format(subject, sess, file)
             try:
                 repetition_variables = extract_variables(fpath, setup=setup)
+                repetition_variables = get_variables_from_replay(fpath, skip_first_step=)
 
                 if remove_fake_reps:
                     if compute_max_score(repetition_variables) > 200:
