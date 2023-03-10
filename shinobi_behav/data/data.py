@@ -5,7 +5,7 @@ import json
 import time
 import shinobi_behav
 import retro
-from shinobi_behav.features.features import compute_max_score
+#from shinobi_behav.features.features import compute_max_score
 from shinobi_behav.utils import list_save
 from tqdm import tqdm
 from bids_loader.stimuli.game import get_variables_from_replay
@@ -182,7 +182,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
             runlist = [x.split("_")[3] for x in sorted(allfiles)]
             skip_first_steps = [True if runlist[i-1] != x else False for i, x in enumerate(runlist)]
         elif setup == "home":
-            skip_first_step = [False for x in allfiles]
+            skip_first_steps = [True for x in allfiles]
         print("Processing : {} {}".format(subject, sess))
         for idx_file, file in tqdm(enumerate(sorted(allfiles))):
             fpath = file_template.format(subject, sess, file)
