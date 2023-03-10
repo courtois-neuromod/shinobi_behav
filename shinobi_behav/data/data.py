@@ -8,7 +8,7 @@ import retro
 from shinobi_behav.features.features import compute_max_score
 from shinobi_behav.utils import list_save
 from tqdm import tqdm
-from bids_loader.stimuli.game import get
+from bids_loader.stimuli.game import get_variables_from_replay
 
 
 def extract_variables(filepath, setup):
