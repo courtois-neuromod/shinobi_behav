@@ -13,7 +13,7 @@ def main():
     dictionnaries, splitted by subject, setup and level, and sorted by date.
     This step is a prerequisite for features computation.
     """
-    #args = parser.parse_args()
+
     path_to_data = shinobi_behav.DATA_PATH
     subjects = shinobi_behav.SUBJECTS
     levels = [f"level-{lev}" for lev in shinobi_behav.LEVELS]

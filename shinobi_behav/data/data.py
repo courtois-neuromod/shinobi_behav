@@ -188,7 +188,7 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
             fpath = file_template.format(subject, sess, file)
             try:
                 #repetition_variables = extract_variables(fpath, setup=setup)
-                repetition_variables = get_variables_from_replay(fpath, save_gif=True, skip_first_step=skip_first_steps[idx_file],
+                repetition_variables = get_variables_from_replay(fpath, save_gif=False, skip_first_step=skip_first_steps[idx_file],
                                                                  game="ShinobiIIIReturnOfTheNinjaMaster-Genesis",
                                                                  inttype=retro.data.Integrations.STABLE)
 
