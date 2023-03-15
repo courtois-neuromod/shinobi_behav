@@ -157,7 +157,6 @@ def get_levelreps(path_to_data, subject, level, setup, remove_fake_reps=True):
         file_template = op.join(
             path_to_data, "shinobi_training", "{}", "{}", "beh", "{}"
         )
-        skip_first_step = False
     elif setup == "scan":
         subject_template = op.join(path_to_data, "shinobi", "{}")
         session_template = op.join(path_to_data, "shinobi", "{}", "{}", "gamelogs")

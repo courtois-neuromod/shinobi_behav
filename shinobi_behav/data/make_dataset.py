@@ -29,17 +29,25 @@ def main():
         for level in levels:
             for setup in ["scan", "home"]:
                 level_variables_path = op.join(
-                    path_to_data, "processed", f"{subj}_{level}_levelwise_variables_{setup}.pkl"
+                    path_to_data, "processed", "levelwise_variables", f"{subj}_{level}_levelwise_variables_{setup}.pkl"
                 )
+                os.makedirs(op.join(path_to_data, "processed", "levelwise_variables"), exist_ok=True)
                 if not os.path.exists(level_variables_path):
                     logger.info(f"Extracting game variables for {subj}_level-{level}")
                     logger.info("Training sessions ({})".format(setup))
                     # Extract variables and store them by sub*level*setup
-                    level_variables = get_levelreps(
+                    levelwise_variables, names_fakereps, names_emptyfiles = get_levelreps(
                         path_to_data, subj, level, remove_fake_reps=True, setup=setup
                     )
 
-                    pickle_save(level_variables_path, level_variables)
+                    pickle_save(level_variables_path, levelwise_variables)
+                    with open(level_variables_path.replace(".pkl", "_fakereps.log"), 'w') as fp:
+                        for item in names_fakereps:
+                            fp.write(f"{item}\n")
+                    with open(level_variables_path.replace(".pkl", "_fakereps.log"), 'w') as fp:
+                        for item in names_emptyfiles:
+                            fp.write(f"{item}\n")
+                        print('Done')
 
 
 if __name__ == "__main__":
