@@ -44,7 +44,7 @@ def main():
                     with open(level_variables_path.replace(".pkl", "_fakereps.log"), 'w') as fp:
                         for item in names_fakereps:
                             fp.write(f"{item}\n")
-                    with open(level_variables_path.replace(".pkl", "_fakereps.log"), 'w') as fp:
+                    with open(level_variables_path.replace(".pkl", "_emptyfiles.log"), 'w') as fp:
                         for item in names_emptyfiles:
                             fp.write(f"{item}\n")
                         print('Done')
