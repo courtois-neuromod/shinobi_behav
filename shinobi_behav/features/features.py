@@ -43,13 +43,14 @@ def load_features_dict(
     """
 
     features_dict_path = op.join(
-        path_to_data, "processed", f"{subject}_{level}_{setup}_repfeats_{metric}.pkl"
+        path_to_data, "processed", "levelwise_variables", f"{subject}_{level}_{setup}_repfeats_{metric}.pkl"
     )
     if not op.isfile(features_dict_path):
 
         level_variables_path = op.join(
             path_to_data,
             "processed",
+            "levelwise_variables",
             f"{subject}_{level}_levelwise_variables_{setup}.pkl",
         )
         with open(level_variables_path, "rb") as f:
