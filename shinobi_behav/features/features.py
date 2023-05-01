@@ -160,7 +160,7 @@ def compute_features(
     if metric is not None:
         for key in features_dict:
             features_dict[key] = moving_descriptive(
-                features_dict[key], N=10, metric=metric
+                features_dict[key], win_size=10, metric=metric
             )
     return features_dict
 
