@@ -6,7 +6,7 @@ from math import ceil
 from scipy.stats import percentileofscore
 import scipy.signal as signal
 from shinobi_behav.utils import pickle_save
-
+from shinobi_behav.utils import moving_descriptive
 
 def load_features_dict(
     path_to_data, subject, level, setup, save=True, metric=None, days_of_train=True
