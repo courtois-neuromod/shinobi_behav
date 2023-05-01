@@ -85,7 +85,7 @@ def lcurves_plot(data_dict, variables, title):
     '''
     Draw a figure containing the learning curves of a subject
     '''
-    fig, axes = plt.subplots(len(variables), 1, figsize=(5,20))
+    fig, axes = plt.subplots(len(variables), 1, figsize=(10,20))
 
     for idx, var in enumerate(variables):
         ax, idx_thresh = learning_curve(data_dict, 'Days of training', var,
@@ -95,7 +95,7 @@ def lcurves_plot(data_dict, variables, title):
     # Adjust overall plots
     for ax in fig.get_axes():
         ax.label_outer()
-    fig.suptitle(title, y=0.92, fontsize=20)
+    fig.suptitle(title, fontsize=20)
     return fig
 
 def fetch_usable_reps(allvars, data_dict, median_thresh):
