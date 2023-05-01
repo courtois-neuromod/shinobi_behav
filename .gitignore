@@ -1,6 +1,7 @@
 # Data folder
 /data
-
+# Outpout folder
+/reports
 
 
 # Byte-compiled / optimized / DLL files
