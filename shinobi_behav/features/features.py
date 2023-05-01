@@ -54,7 +54,7 @@ def load_features_dict(
             f"{subject}_{level}_levelwise_variables_{setup}.pkl",
         )
         with open(level_variables_path, "rb") as f:
-            levelwise_variables, _, _ = pickle.load(f)
+            levelwise_variables = pickle.load(f)
         features_dict = compute_features(
             levelwise_variables,
             metric=metric,

@@ -19,7 +19,7 @@ parser.add_argument(
 parser.add_argument(
 	"-l",
 	"--level",
-	default = '1-0',
+	default = '1',
 	type = str,
 	help="Level to process"
 )
@@ -33,16 +33,17 @@ def main():
     src.features.build_features.py must be ran before using generate_lcurves
     """
     path_to_data = shinobi_behav.DATA_PATH
+    figures_path = op.join(shinobi_behav.SRC_PATH, "data", "shinobi_behav", "reports", "figures")
     logger = logging.getLogger(__name__)
     logger.info('create repetition-wise features')
     variables = ['Health loss', 'Max score', 'Percent complete']
 
     subj = 'sub-' + args.subject
-    level = args.level
+    level = 'level-' + args.level
 
-    print('Extracting game variables for {subj}_level-{level}')
+    print(f'Extracting game variables for {subj}_level-{level}')
 
-    data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean')
+    data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean', days_of_train=False)
 
     # Generate and save plot
     fig = lcurves_plot(data_dict, variables, f'{subj}_level{level}')
