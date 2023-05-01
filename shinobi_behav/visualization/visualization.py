@@ -57,7 +57,7 @@ def learning_curve(data_dict, time, variable,
         if y_jitter != None:
             ydata = ydata + np.random.rand(len(ydata))*y_jitter
         if ax == None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(dpi=300)
         if variable == 'Completion speed' or variable == 'Relative speed':
             ax.invert_yaxis()
         ax.scatter(xdata, ydata, label='data')
@@ -77,6 +77,7 @@ def learning_curve(data_dict, time, variable,
             ax.yaxis.get_label().set_fontsize(20)
         ax.tick_params(axis='x', labelsize=15)
         ax.tick_params(axis='y', labelsize=15)
+        plt.tight_layout()
         return ax, days_thresh
     return days_thresh
 
