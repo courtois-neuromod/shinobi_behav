@@ -95,7 +95,7 @@ def lcurves_plot(data_dict, variables, title):
     # Adjust overall plots
     for ax in fig.get_axes():
         ax.label_outer()
-    fig.suptitle(title, fontsize=20)
+    fig.suptitle(title, y=1.1, fontsize=20)
     return fig
 
 def fetch_usable_reps(allvars, data_dict, median_thresh):
