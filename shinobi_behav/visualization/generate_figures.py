@@ -38,16 +38,18 @@ def main():
     logger.info('create repetition-wise features')
     variables = ['Health loss', 'Max score', 'Percent complete']
 
-    subj = 'sub-' + args.subject
-    level = 'level-' + args.level
+    #subj = 'sub-' + args.subject
+    #level = 'level-' + args.level
+    for subj in shinobi_behav.SUBJECTS:
+        for level in shinobi_behav.LEVELS:
+            level = "level-" + level
+            print(f'Extracting game variables for {subj}_level-{level}')
 
-    print(f'Extracting game variables for {subj}_level-{level}')
+            data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean')
 
-    data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean')
-
-    # Generate and save plot
-    fig = lcurves_plot(data_dict, variables, f'{subj}_level{level}')
-    fig.savefig(op.join(figures_path, f'{subj}_{level}_learning_curve.tif', dpi=300, bbox_inches='tight'))
+            # Generate and save plot
+            fig = lcurves_plot(data_dict, variables, f'{subj}_level{level}')
+            fig.savefig(op.join(figures_path, f'{subj}_{level}_learning_curve.tif'))
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
