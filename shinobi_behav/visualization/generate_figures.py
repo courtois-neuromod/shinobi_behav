@@ -43,7 +43,7 @@ def main():
 
     print(f'Extracting game variables for {subj}_level-{level}')
 
-    data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean', days_of_train=False)
+    data_dict = load_features_dict(path_to_data, subj, level, 'home', save=True, metric='mean')
 
     # Generate and save plot
     fig = lcurves_plot(data_dict, variables, f'{subj}_level{level}')

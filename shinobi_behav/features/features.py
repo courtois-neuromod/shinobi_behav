@@ -7,6 +7,7 @@ from scipy.stats import percentileofscore
 import scipy.signal as signal
 from shinobi_behav.utils import pickle_save
 from shinobi_behav.utils import moving_descriptive
+import json
 
 def load_features_dict(
     path_to_data, subject, level, setup, save=True, metric=None, days_of_train=True
@@ -186,7 +187,12 @@ def compute_days_of_train(levelwise_variables):
     days_of_training = []
     timestamps = []
     for repetition_dict in levelwise_variables:
-        timestamps.append(repetition_dict["timestamp"])
+        json_fname = repetition_dict['filename'].replace(".bk2", ".json")
+        with open(json_fname, "r") as f:
+            json_dict = json.load(f)
+        timestamps.append(json_dict["LevelStartTimestamp"])
+        
+    #timestamps.append(repetition_dict["timestamp"])
     first_day = datetime.fromtimestamp(np.min(timestamps))
 
     for timestamp in timestamps:
@@ -328,7 +334,7 @@ def compute_time2complete(levelwise_variables):
     time2complete = list with one element per repetition (number of frames until end)
 
     """
-    time2pos_lists = compute_time2pos(fix_position_resets(levelwise_variables))
+    time2pos_lists = get_time2pos(fix_position_resets(levelwise_variables))
     completed = compute_completed(levelwise_variables)
     time2complete = []
     for i, r in enumerate(completed):
