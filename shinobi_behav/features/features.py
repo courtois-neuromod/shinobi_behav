@@ -355,7 +355,7 @@ def compute_rel_speed(levelwise_variables):
     rel_speed = list with one element per repetition
     """
     X_player_list = fix_position_resets(levelwise_variables)
-    time2pos_list = compute_time2pos(X_player_list)
+    time2pos_list = get_time2pos(X_player_list)
     distrib_t2p = distributions_t2p(time2pos_list)
     rel_speed = []
     for i, run in enumerate(time2pos_list):
