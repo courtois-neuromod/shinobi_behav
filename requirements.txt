@@ -21,3 +21,4 @@ load_confounds
 seaborn
 statsmodels
 tqdm
+dataframe_image
