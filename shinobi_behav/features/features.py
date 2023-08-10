@@ -8,6 +8,7 @@ import scipy.signal as signal
 from shinobi_behav.utils import pickle_save
 from shinobi_behav.utils import moving_descriptive
 import json
+import shinobi_behav
 
 def load_features_dict(
     path_to_data, subject, level, setup, save=True, metric=None, days_of_train=True
