@@ -132,9 +132,9 @@ def compute_features(
     if days_of_train:
         features_dict["Days of training"] = compute_days_of_train(list_variables)
         print("Days of training computed")
-    else:
-        features_dict["Passage order"] = list(range(len(list_variables)))
-        print("Passage order computed")
+    #else:
+    features_dict["Passage order"] = list(range(len(list_variables)))
+    print("Passage order computed")
     if rel_speed:
         features_dict["Relative speed"] = compute_rel_speed(list_variables)
         print("Relative speed computed")
